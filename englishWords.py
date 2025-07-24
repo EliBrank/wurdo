@@ -1,17 +1,17 @@
 from english_words import get_english_words_set
-from phonimize import phonimize
+from g2p_en import G2p
 
-
+# Get and sort words
 word_set = get_english_words_set(['web2'], lower=True)
+filtered_words = [word for word in sorted(word_set) if 3 <= len(word) <= 7]
 
-sorted_wordSet = sorted(word_set)
+# Initialize G2P converter
+g2p = G2p()
 
+# Write to a single CSV
 with open("data.csv", "w") as f:
-    f.write("word,\n")
-    for word in sorted_wordSet:
-        if 3 <= len(word) <= 7:
-            f.writelines(f"{word},\n")
-
-with open("data.csv", "r") as baseFile, open("append.txt") as appendFile:
-    baseLines = baseFile.readlines()
-    appendLines = appendFile.readlines()
+    f.write("word,pronunciation\n")
+    for word in filtered_words:
+        phonemes = g2p(word)
+        phoneme_str = " ".join(phonemes)  # Convert list to space-separated string
+        f.write(f"{word},{phoneme_str}\n")
