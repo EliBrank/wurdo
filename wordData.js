@@ -1,24 +1,3 @@
-import * as readline from 'readline';
-import { pathToFileURL } from 'url';
-
-class Prototype {
-  constructor(initialWord) {
-    this.rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-      prompt: '> '
-    });
-
-    this.gameState = {
-      score: 0,
-      meter: 20,
-      currentWord: initialWord,
-    };
-
-    this.isRunning = true
-  }
-}
-
 const words = {
   "dark": {
     "obo": { "dare": 20 },
@@ -31,7 +10,6 @@ const words = {
     "rhyme": { "flare": 15 },
     "anagram": {}
   },
-
 
   "flare": {
     "obo": { "flame": 30 },
@@ -152,16 +130,6 @@ const words = {
     "rhyme": {},
     "anagram": {}
   },
-
 }
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-if (import.meta.url === pathToFileURL(process.argv[1].href)) {
-  // module called directly
-}
-
-rl.question()
+export default words;
