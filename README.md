@@ -49,3 +49,19 @@ To get a local copy of this project up and running for development, follow these
     ```bash
     python preprocess_words.py
     ```
+
+## Usage
+
+To run the full application:
+
+1.  Ensure your Redis server is running.
+2.  In the `backend` directory, start the API server:
+    ```bash
+    python app.py
+    ```
+3.  In a separate terminal in the project's root, start the React app:
+    ```bash
+    npm start
+    ```
+## Project Status
+We will add this part later.
