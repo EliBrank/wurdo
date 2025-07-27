@@ -70,3 +70,8 @@ To run the full application:
 We will add this part later.
 
 ## Authors
+Kelci Atkinson
+Eli Brinkman
+Isaac Edwards
+Nathan Rhys
+Danny McGeough
