@@ -10,6 +10,7 @@ A relaxing and engaging word puzzle game inspired by Balatro and Wordle, where p
 - [Installation and Setup](#installation-and-setup)
 - [Game Logic](#game-logic)
 - [Project Status](#project-status)
+- [Authors](#authors)
 
 ## Project Goal
 The primary objective of this project was to build a fun, low-stress word game for anyone to enjoy. We wanted to build a kind of game that we would enjoy that we could share with others. It was inspired by the NYTimes Wordle. The unique combination of linguistic puzzles aims to provide a fresh and replayable experience. The game's core loop is designed to be intuitive and accessible, with a strategic layer introduced through the "energy" mechanic.
@@ -67,3 +68,5 @@ To run the full application:
     ```
 ## Project Status
 We will add this part later.
+
+## Authors
