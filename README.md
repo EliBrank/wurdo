@@ -1,5 +1,6 @@
 # wurdo
 <img width="815" height="231" alt="image" src="https://github.com/user-attachments/assets/48e5cf77-5bda-41cd-9fd7-7640dba34efe" />
+
 A relaxing and engaging word puzzle game inspired by Balatro and Wordle, where players chain words together by finding homophones, rhymes, or adding a single letter.
 
 ## Table of Contents
