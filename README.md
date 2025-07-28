@@ -72,8 +72,12 @@ To run the full application:
 We will add this part later.
 
 ## Authors
-Kelci Atkinson
+Kelci Atkinson - [Github](https://github.com/kelciatkinson) / [Email](kelciatkinson@gmail.com)
+
 Eli Brinkman
+
 Isaac Edwards
+
 Nathan Rhys
-Danny McGeough
+
+Danny McGeough - [Github](https://github.com/DanielMcgeough) / [Email](danny.mcgeough@gmail.com)
