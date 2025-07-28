@@ -7,7 +7,7 @@ const words = {
 
   "dare": {
     "anagram": {},
-    "rhyme": { "flare": 15 },
+    "rhyme": { "flare": 15, "share": 15 },
     "obo": { "dark": 20 },
   },
 
@@ -24,7 +24,7 @@ const words = {
   },
 
   "same": {
-    "anagram": {},
+    "anagram": { "seam": 30 },
     "rhyme": { "flame": 15, "shame": 15, "claim": 15 },
     "obo": { "shame": 30 },
   },
@@ -37,14 +37,14 @@ const words = {
 
   "share": {
     "anagram": {},
-    "rhyme": { "flare": 15 },
+    "rhyme": { "dare": 10, "flare": 15 },
     "obo": { "flame": 30, "shame": 30 },
   },
 
   "claim": {
     "anagram": {},
     "rhyme": { "flame": 15, "shame": 15, "same": 10 },
-    "obo": { "dare": 12 },
+    "obo": {},
   },
 
   "clam": {
@@ -60,7 +60,7 @@ const words = {
   },
 
   "seam": {
-    "anagram": {},
+    "anagram": { "same": 30 },
     "rhyme": { "steam": 15, "stream": 20 },
     "obo": { "steam": 30 },
   },

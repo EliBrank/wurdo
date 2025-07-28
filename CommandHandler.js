@@ -46,8 +46,6 @@ export default class CommandHandler {
     }
 
     const meterChange = Math.floor(((scoreChange - 50) / 10) - 1);
-    console.log('Change in meter:', meterChange);
-    console.log('New meter value:',this.gameState.meter += meterChange);
 
     this.gameState.score += scoreChange;
     this.gameState.meter += meterChange;
@@ -65,13 +63,13 @@ export default class CommandHandler {
     console.log(`Current Score: ${status.score}`);
     console.log(`Energy Meter: ${status.meterBar}`);
     console.log();
+    console.log('Available words:');;
+    console.log(Object.keys(words));
+    console.log('===================================');
     console.log('Played Words:')
     status.recentWords.forEach((word) => {
       console.log(word);
     });
-    console.log('===================================');
-    console.log('Available words:');;
-    console.log(Object.keys(words));
     console.log();
   }
 }
