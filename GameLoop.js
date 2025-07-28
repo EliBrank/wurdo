@@ -1,26 +1,26 @@
-import readline from 'readline';
-import { pathToFileURL } from 'url';
-import GameState from './GameState.js';
-import CommandHandler from './CommandHandler.js';
+import readline from "readline";
+import { pathToFileURL } from "url";
+import GameState from "./GameState.js";
+import CommandHandler from "./CommandHandler.js";
 
 export default class GameLoop {
   constructor(initialWord) {
     this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
-      prompt: '> '
+      prompt: "> ",
     });
 
     this.gameState = new GameState(initialWord);
     this.commandHandler = new CommandHandler(this.gameState, this);
-    this.isRunning = true
+    this.isRunning = true;
 
     this.setupEventHandlers();
   }
 
   setupEventHandlers() {
     // Logic for game loop
-    this.rl.on('line', (input) => {
+    this.rl.on("line", (input) => {
       const shouldContinue = this.commandHandler.handleInput(input);
       if (shouldContinue) {
         this.gameLoop();
@@ -30,25 +30,31 @@ export default class GameLoop {
       }
     });
 
-    this.rl.on('close', () => {
-      console.log('\nEnd game. Exiting...');
+    this.rl.on("close", () => {
+      console.log("\nEnd game. Exiting...");
       process.exit(0);
     });
 
-    process.on('SIGINT', () => {
-      console.log('\nGame interrupted. Exiting...');
+    process.on("SIGINT", () => {
+      console.log("\nGame interrupted. Exiting...");
       process.exit(0);
     });
   }
 
   start() {
-    console.log('Welcome to Wurdo!');
-    this.rl.setPrompt('Type a word> ');
+    console.log("Welcome to Wurdo!");
+    this.rl.setPrompt("Type a word> ");
     this.gameLoop();
   }
 
   gameLoop() {
     if (!this.isRunning) return;
+    if (this.gameState.meter <= 0) {
+      console.log("Game over! Meter has reached zero.");
+      this.isRunning = false;
+      this.rl.close();
+      return;
+    }
 
     this.commandHandler.showGameState();
     this.rl.prompt();
