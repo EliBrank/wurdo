@@ -1,9 +1,9 @@
-import * as readline from 'readline';
+import readline from 'readline';
 import { pathToFileURL } from 'url';
-import GameState from './GameState';
-import CommandHandler from './CommandHandler';
+import GameState from './GameState.js';
+import CommandHandler from './CommandHandler.js';
 
-class GameLoop {
+export default class GameLoop {
   constructor(initialWord) {
     this.rl = readline.createInterface({
       input: process.stdin,
@@ -21,7 +21,7 @@ class GameLoop {
   setupEventHandlers() {
     // Logic for game loop
     this.rl.on('line', (input) => {
-      const shouldContinue = this.commandHandler.handleCommand(input);
+      const shouldContinue = this.commandHandler.handleInput(input);
       if (shouldContinue) {
         this.gameLoop();
       } else {
@@ -35,7 +35,7 @@ class GameLoop {
       process.exit(0);
     });
 
-    process.on('SIGNINT', () => {
+    process.on('SIGINT', () => {
       console.log('\nGame interrupted. Exiting...');
       process.exit(0);
     });
@@ -43,21 +43,20 @@ class GameLoop {
 
   start() {
     console.log('Welcome to Wurdo!');
-    this.commandHandler.showGameState();
+    this.rl.setPrompt('Type a word> ');
     this.gameLoop();
   }
 
+  gameLoop() {
+    if (!this.isRunning) return;
+
+    this.commandHandler.showGameState();
+    this.rl.prompt();
+  }
 }
 
-
-
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
-if (import.meta.url === pathToFileURL(process.argv[1].href)) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   // module called directly
+  const game = new GameLoop();
+  game.start();
 }
-
-rl.question()

@@ -7,7 +7,7 @@ console.log('===================================');
 console.log(`Current Score: 530`);
 console.log(`Energy Meter: ##########__________`);
 console.log();
-wordList.forEach((word) => {
+wordList.slice(0, 6).forEach((word) => {
   console.log(word);
 });
 console.log('===================================');

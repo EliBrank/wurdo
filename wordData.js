@@ -1,134 +1,134 @@
 const words = {
   "dark": {
-    "obo": { "dare": 20 },
+    "anagram": {},
     "rhyme": {},
-    "anagram": {}
+    "obo": { "dare": 20 },
   },
 
   "dare": {
-    "obo": { "dark": 20 },
+    "anagram": {},
     "rhyme": { "flare": 15 },
-    "anagram": {}
+    "obo": { "dark": 20 },
   },
 
   "flare": {
-    "obo": { "flame": 30 },
+    "anagram": {},
     "rhyme": { "dare": 10, "share": 15 },
-    "anagram": {}
+    "obo": { "flame": 30 },
   },
 
   "flame": {
-    "obo": { "flare": 30 },
+    "anagram": {},
     "rhyme": { "same": 10, "shame": 15, "claim": 15 },
-    "anagram": {}
+    "obo": { "flare": 30 },
   },
 
   "same": {
-    "obo": { "shame": 30 },
+    "anagram": {},
     "rhyme": { "flame": 15, "shame": 15, "claim": 15 },
-    "anagram": {}
+    "obo": { "shame": 30 },
   },
 
   "shame": {
-    "obo": { "same": 20, "share": 30 },
+    "anagram": {},
     "rhyme": { "flame": 15, "same": 15, "claim": 15 },
-    "anagram": {}
+    "obo": { "same": 20, "share": 30 },
   },
 
   "share": {
-    "obo": { "flame": 30, "shame": 30 },
+    "anagram": {},
     "rhyme": { "flare": 15 },
-    "anagram": {}
+    "obo": { "flame": 30, "shame": 30 },
   },
 
   "claim": {
-    "obo": { "dare": 12 },
+    "anagram": {},
     "rhyme": { "flame": 15, "shame": 15, "same": 10 },
-    "anagram": {}
+    "obo": { "dare": 12 },
   },
 
   "clam": {
-    "obo": { "clam": 20 },
+    "anagram": {},
     "rhyme": { "slam": 10 },
-    "anagram": {}
+    "obo": { "clam": 20 },
   },
 
   "slam": {
-    "obo": { "clam": 20 },
+    "anagram": {},
     "rhyme": { "clam": 10 },
-    "anagram": {}
+    "obo": { "clam": 20 },
   },
 
   "seam": {
-    "obo": { "steam": 30 },
+    "anagram": {},
     "rhyme": { "steam": 15, "stream": 20 },
-    "anagram": {}
+    "obo": { "steam": 30 },
   },
 
   "steam": {
-    "obo": { "seam": 20, "stream": 40 },
+    "anagram": {},
     "rhyme": { "seam": 10, "stream": 25 },
-    "anagram": {}
+    "obo": { "seam": 20, "stream": 40 },
   },
 
   "stream": {
-    "obo": { "steam": 15 },
+    "anagram": { "master": 70 },
     "rhyme": { "steam": 15, "steam": 20 },
-    "anagram": { "master": 70 }
+    "obo": { "steam": 15 },
   },
 
   "master": {
-    "obo": { "faster": 40 },
+    "anagram": { "stream": 70 },
     "rhyme": { "faster": 20 },
-    "anagram": { "stream": 70 }
+    "obo": { "faster": 40 },
   },
 
   "faster": {
-    "obo": { "master": 40 },
+    "anagram": { "strafe": 70 },
     "rhyme": { "master": 20 },
-    "anagram": { "strafe": 70 }
+    "obo": { "master": 40 },
   },
 
   "strafe": {
-    "obo": { "strife": 40 },
+    "anagram": { "faster": 70 },
     "rhyme": {},
-    "anagram": { "faster": 70 }
+    "obo": { "strife": 40 },
   },
 
   "strife": {
-    "obo": { "strafe": 40 },
+    "anagram": {},
     "rhyme": { "life": 20 },
-    "anagram": {}
+    "obo": { "strafe": 40 },
   },
 
   "life": {
-    "obo": { "live": 20 },
+    "anagram": { "file": 30 },
     "rhyme": {},
-    "anagram": { "file": 30 }
+    "obo": { "live": 20 },
   },
 
   "live": {
-    "obo": { "life": 20, "vile": 20 },
+    "anagram": {},
     "rhyme": {},
-    "anagram": {}
+    "obo": { "life": 20, "vile": 20 },
   },
 
   "vile": {
-    "obo": { "file": 20 },
+    "anagram": { "live": 30 },
     "rhyme": { "file": 10 },
-    "anagram": { "live": 30 }
+    "obo": { "file": 20 },
   },
 
   "file": {
-    "obo": { "vile": 20 },
+    "anagram": { "life": 30 },
     "rhyme": { "vile": 10 },
-    "anagram": { "life": 30 }
+    "obo": { "vile": 20 },
   },
 
   "film": {
-    "obo": { "file": 20 },
+    "anagram": {},
     "rhyme": {},
-    "anagram": {}
+    "obo": { "file": 20 },
   },
 }
 

@@ -7,11 +7,13 @@ export default class GameState {
   }
 
   getStatus() {
+    // const meterValue = Math.max(0, Math.min(20, this.meter));
     const meterBar = '#'.repeat(this.meter) + '_'.repeat(20 - this.meter);
-    const recentWords = wordHistory.slice(0, 5).reverse();
+    const recentWords = this.wordHistory.slice(0, 5).reverse();
+    // console.log('TESTING - meterBar:', meterBar);
     return {
       score: this.score,
-      meter: meterBar,
+      meterBar: meterBar,
       recentWords: recentWords,
     };
   }
