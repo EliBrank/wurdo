@@ -78,6 +78,6 @@ Eli Brinkman
 
 Isaac Edwards
 
-Nathan Rhys - [Github](https://github.com/3lakrukh) / [Email](nathan.rhys@atlasschool.com)
+Nathan Rhys - [Github](https://github.com/3lackrukh) / [Email](nathan.rhys@atlasschool.com)
 
 Danny McGeough - [Github](https://github.com/DanielMcgeough) / [Email](danny.mcgeough@gmail.com)
