@@ -210,18 +210,12 @@ huggingface/
 
 # Large data files
 *.csv
-*.json
 *.txt
 !requirements.txt
 !package.json
 !README.md
 !LICENSE
 
-# Test results
-test_*.json
-*_results.json
-*_analysis.json
-!shared_results/
 
 # Logs
 *.log
