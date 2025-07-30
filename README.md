@@ -76,7 +76,7 @@ Kelci Atkinson - [Github](https://github.com/kelciatkinson) / [Email](kelciatkin
 
 Eli Brinkman - [Github](https://github.com/elibrank) / [Email](ezb.business@pm.me)
 
-Isaac Edwards
+Isaac Edwards -[Github](https://github.com/IsaacTheEddy) / [Email](isaactheedwards@gmail.com)
 
 Nathan Rhys - [Github](https://github.com/3lackrukh) / [Email](nathan.rhys@atlasschool.com)
 
