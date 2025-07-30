@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Link from "next/link";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -8,7 +9,9 @@ export default function Navbar() {
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo */}
         {/* Put logo here instead of h1? */}
-        <h1 className="font-bold">würdo</h1>
+        <h1 className="font-bold">
+          <Link href="/">würdo</Link>
+        </h1>
 
         {/* Mobile Menu Button */}
         <button
