@@ -19,6 +19,8 @@ The primary objective of this project was to build a fun, low-stress word game f
 - **Frontend:**
   - `React`: A JavaScript library for building the user interface.
   - `Tailwind CSS`: A utility-first CSS framework for rapid and responsive styling.
+  - `Vercel` : Vercel is a cloud platform that enables developers to deploy and hostwebsites and web services instantly, primarily focusing on frontend       frameworks and serverless functions for maximum speed and scalability.
+  - `Next.JS` : Vercel is a cloud platform that enables developers to deploy and host websites and web services instantly, primarily focusing on frontend frameworks and serverless functions for maximum speed and scalability.
 
 - **Backend & Data:**
   - `Python`: The backend language.
@@ -70,8 +72,12 @@ To run the full application:
 We will add this part later.
 
 ## Authors
-Kelci Atkinson
-Eli Brinkman
+Kelci Atkinson - [Github](https://github.com/kelciatkinson) / [Email](kelciatkinson@gmail.com)
+
+Eli Brinkman - [Github](https://github.com/elibrank) / [Email](ezb.business@pm.me)
+
 Isaac Edwards
-Nathan Rhys
-Danny McGeough
+
+Nathan Rhys - [Github](https://github.com/3lackrukh) / [Email](nathan.rhys@atlasschool.com)
+
+Danny McGeough - [Github](https://github.com/DanielMcgeough) / [Email](danny.mcgeough@gmail.com)
