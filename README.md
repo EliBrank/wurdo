@@ -74,7 +74,7 @@ We will add this part later.
 ## Authors
 Kelci Atkinson - [Github](https://github.com/kelciatkinson) / [Email](kelciatkinson@gmail.com)
 
-Eli Brinkman
+Eli Brinkman - [Github](https://github.com/elibrank) / [Email](ezb.business@pm.me)
 
 Isaac Edwards
 
