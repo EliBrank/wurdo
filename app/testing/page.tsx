@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { getWordData, updateWordData, createWordEntry } from "@/lib/actions";
-import { FullWordData, WordUpdateData } from "@/lib/definitions";
+import { FullWordData, PartialUpdateData } from "@/lib/definitions";
+import { RhymeMicro } from "@/lib/microservices";
 
 export default function WordEditor() {
   // State for the search input field
@@ -96,7 +97,7 @@ export default function WordEditor() {
     setMessage(null);
 
     // Prepare the data payload for the backend
-    const updateData: WordUpdateData = {};
+    const updateData: PartialUpdateData = {};
     if (formData.pronunciation.trim()) {
       updateData.pronunciation = formData.pronunciation.trim();
     }
@@ -122,7 +123,7 @@ export default function WordEditor() {
 
       if (isCreating) {
         // --- CREATE LOGIC ---
-        success = await createWordEntry(activeWord, updateData.pronunciation);
+        success = await createWordEntry(activeWord);
         const remainingUpdates = { ...updateData };
         delete remainingUpdates.pronunciation;
         if (success && Object.keys(remainingUpdates).length > 0) {
@@ -279,22 +280,23 @@ export default function WordEditor() {
               <label className="block text-sm font-medium text-gray-700">
                 Rhymes
               </label>
-              {data?.rhy && Object.keys(data.rhy).length > 0 && (
-                <ul className="list-disc list-inside text-gray-600 text-sm mt-1 bg-gray-50 p-2 rounded">
-                  {Object.entries(data.rhy).map(([w, s]) => (
-                    <li key={w}>
-                      {w} (Score: {s})
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <input
-                name="newRhymeWord"
-                className="border p-2 rounded-md w-full mt-2"
-                placeholder="Add new Rhyme"
-                value={formData.newRhymeWord}
-                onChange={handleInputChange}
-              />
+              <form action={RhymeMicro}>
+                <input
+                  name="newRhymeWord"
+                  className="border p-2 rounded-md w-full mt-2"
+                  placeholder="Add new Rhyme"
+                  value={formData.newRhymeWord}
+                  onChange={handleInputChange}
+                />
+                <input
+                  name="word"
+                  type="hidden"
+                  className="border p-2 rounded-md w-full mt-2"
+                  placeholder="Add new Rhyme"
+                  value={activeWord}
+                />
+                <button type="submit">Click here to test</button>
+              </form>
             </div>
           </div>
         </div>

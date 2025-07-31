@@ -34,7 +34,6 @@ export async function getWordData(word: string): Promise<FullWordData | null> {
  */
 export async function createWordEntry(
   word: string,
-  initialPronunciation?: string
 ): Promise<boolean> {
   if (!word) {
     console.warn("createWordEntry called with empty word.");
@@ -48,7 +47,7 @@ export async function createWordEntry(
     return false;
   }
 
-  const pronunciation = initialPronunciation ?? toARPABET(word);
+  const pronunciation = toARPABET(word);
 
   const initialData: FullWordData = {
     pronunciation: pronunciation,
