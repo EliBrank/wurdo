@@ -40,7 +40,7 @@ export async function createWordEntry(word: string, initialPronunciation?: strin
     return false; 
   }
 
-  const pronunciation = initialPronunciation ?? toARPABET(word);
+  const pronunciation = toARPABET(word);
 
   const initialData: FullWordData = {
     pronunciation: pronunciation,
