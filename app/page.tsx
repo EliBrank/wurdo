@@ -1,6 +1,7 @@
 "use client";
 import Navbar from "../src/components/Navbar";
 import React from "react";
+import GameModeButton from "@/src/components/GameModeButton";
 
 export default function HomePage() {
   return (
@@ -13,6 +14,9 @@ export default function HomePage() {
             Desktop coming soon!
           </p>
         </div>
+        <section className="md:hidden">
+          <GameModeButton label="Daily" href="/play" />
+        </section>
       </main>
     </div>
   );

@@ -2,7 +2,7 @@
 import React from "react";
 import Navbar from "@/src/components/Navbar";
 
-export default function AboutPage() {
+export default function SettingsPage() {
   return (
     <div>
       <Navbar />
@@ -16,12 +16,7 @@ export default function AboutPage() {
         </div>
         {/* Page Content */}
         <section>
-          <p className="md:hidden mt-2 p-4 space-y-2 rounded-3xl bg-amber-400">
-            Würdo is a daily word ladder challenge where puzzle is unique. Play
-            words that are one letter off, rhyme, or are anagrams to earn
-            points. But be careful — once your energy bar runs out, the game is
-            over!
-          </p>
+          <p>Game Play coming soon!</p>
         </section>
       </main>
     </div>
