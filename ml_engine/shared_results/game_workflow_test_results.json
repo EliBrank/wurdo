@@ -1,0 +1,11 @@
+{
+  "test_timestamp": "2025-07-29T20:18:25.631692",
+  "test_words": [
+    "cat",
+    "dog",
+    "hat"
+  ],
+  "scores": [],
+  "invalid_tests": 4,
+  "json_file_size": 4430364
+}

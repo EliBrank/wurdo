@@ -4,6 +4,15 @@ This directory contains test result files that demonstrate the ML engine's perfo
 
 ## Files
 
+### `optimization_test_results.json`
+**Test**: Probability vector optimization demonstration  
+**Purpose**: Shows the massive efficiency gain from using one probability vector for multiple candidates  
+**Key Findings**:
+- **32.67x speedup** for multiple candidates
+- Identical results between optimized and unoptimized methods
+- One probability vector (50,257 values) can score ANY word
+- Perfect for pre-computing and caching probability vectors
+
 ### `probability_scoring_results.json`
 **Test**: Advanced scoring with 9 carefully selected words  
 **Purpose**: Shows how the probability-based scoring system performs on different word categories  
@@ -23,6 +32,16 @@ This directory contains test result files that demonstrate the ML engine's perfo
 - Model correctly identifies semantic relationships
 
 ## How to Read the Results
+
+### Optimization Results
+The `optimization_test_results.json` demonstrates a key insight: **by storing one probability vector, we can read probabilities from a given start_word to any other word in the token vocabulary**.
+
+**Performance Comparison**:
+- **Current Method**: 1.21 seconds for 9 candidates (9 model calls)
+- **Optimized Method**: 0.037 seconds for 9 candidates (1 model call)
+- **Speedup**: 32.67x faster
+
+**Key Insight**: One probability vector contains 50,257 probabilities (one for each token), allowing instant lookup of any word's probability without running the model again.
 
 ### Creativity Score Interpretation
 - **0.999+**: Very creative (unlikely/predictable)
@@ -54,9 +73,11 @@ This shows that "bat" (a valid rhyme for "cat") has:
 ## Next Steps
 
 The team should focus on:
-1. Testing with complete rhyme lists for better scale
-2. Finding optimal creativity bonus ranges
-3. Balancing semantic vs. phonetic creativity
+1. **Pre-computing probability vectors** for common start words
+2. **Caching vectors in Redis** for instant lookup
+3. Testing with complete rhyme lists for better scale
+4. Finding optimal creativity bonus ranges
+5. Balancing semantic vs. phonetic creativity
 
 ---
 
