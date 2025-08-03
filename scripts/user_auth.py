@@ -240,39 +240,31 @@ if __name__ == "__main__":
                 # Remove password hash for safe printing
                 del final_stats['password_hash']
                 print(final_stats)
-                
-# --- Main Script Execution (for demonstration) ---
-if __name__ == "__main__":
-    users_collection = connect_to_mongodb(MONGO_URI, MONGO_DB_NAME, MONGO_COLLECTION_NAME)
-    redis_client = connect_to_redis(REDIS_HOST, REDIS_PORT, REDIS_DB)
-    
-    if not users_collection or not redis_client:
-        exit()
-        
-    # --- Register a new user ---
-    print("\n--- TEST: Registering a new user ---")
-    register_result = register_user(users_collection, "wurdo_player", "super-secret-password")
-    print(register_result)
+  
+        # --- Register a new user ---
+        print("\n--- TEST: Registering a new user ---")
+        register_result = register_user(users_collection, "wurdo_player", "super-secret-password")
+        print(register_result)
 
-    # --- Login the new user ---
-    print("\n--- TEST: Logging in a new user ---")
-    login_result = login_user(users_collection, redis_client, "wurdo_player", "super-secret-password")
-    print(login_result)
-    
-    session_token = login_result.get('session_token')
+        # --- Login the new user ---
+        print("\n--- TEST: Logging in a new user ---")
+        login_result = login_user(users_collection, redis_client, "wurdo_player", "super-secret-password")
+        print(login_result)
 
-    # --- Verify the session token ---
-    if session_token:
-        print("\n--- TEST: Getting user from a valid session token ---")
-        session_result = get_user_from_session(users_collection, redis_client, session_token)
-        print(session_result)
+        session_token = login_result.get('session_token')
+
+        # --- Verify the session token ---
+        if session_token:
+            print("\n--- TEST: Getting user from a valid session token ---")
+            session_result = get_user_from_session(users_collection, redis_client, session_token)
+            print(session_result)
     
-        # --- Logout the user ---
-        print("\n--- TEST: Logging out the user ---")
-        logout_result = logout_user(redis_client, session_token)
-        print(logout_result)
+            # --- Logout the user ---
+            print("\n--- TEST: Logging out the user ---")
+            logout_result = logout_user(redis_client, session_token)
+            print(logout_result)
         
-        # --- Verify the session is now invalid ---
-        print("\n--- TEST: Trying to use the session token after logout ---")
-        invalid_session_result = get_user_from_session(users_collection, redis_client, session_token)
-        print(invalid_session_result)
+            # --- Verify the session is now invalid ---
+            print("\n--- TEST: Trying to use the session token after logout ---")
+            invalid_session_result = get_user_from_session(users_collection, redis_client, session_token)
+            print(invalid_session_result)
