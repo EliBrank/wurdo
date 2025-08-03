@@ -132,6 +132,115 @@ def logout_user(redis_client, session_token):
     redis_client.delete(f"session:{session_token}")
     return {'status': 'success', 'message': 'Logged out successfully.'}
 
+# ... (all your existing code from user_auth.py) ...
+
+def update_user_game_stats(mongo_collection, redis_client, user_id, new_score_data):
+    """
+    Updates a user's game statistics in MongoDB and invalidates the Redis cache.
+
+    Args:
+        mongo_collection: The MongoDB collection object.
+        redis_client: The Redis client object.
+        user_id (str): The ID of the user to update.
+        new_score_data (dict): A dictionary containing the results of a single game.
+            Example: {
+                'game_chain': {'start_word': 'cat', 'chain_length': 3, 'words_in_chain': ['cat', 'at', 'a']},
+                'game_score': 150
+            }
+    
+    Returns:
+        bool: True on successful update, False otherwise.
+    """
+    # 1. Fetch the user's current stats to compare
+    user_document = mongo_collection.find_one({'_id': ObjectId(user_id)})
+    if not user_document:
+        print(f"Error: User with ID {user_id} not found.")
+        return False
+    
+    current_best_chain_length = user_document['best_chain']['chain_length']
+    new_chain_data = new_score_data['game_chain']
+    new_chain_length = new_chain_data['chain_length']
+    new_total_score = user_document['total_score'] + new_score_data['game_score']
+    new_games_played = user_document['games_played'] + 1
+    
+    # Prepare the update document
+    update_doc = {
+        '$set': {
+            'total_score': new_total_score,
+            'games_played': new_games_played
+        }
+    }
+
+    # 2. Check if the new chain is a new high score
+    if new_chain_length > current_best_chain_length:
+        update_doc['$set']['best_chain'] = new_chain_data
+        print(f"New high score! Updating best chain for user {user_id}.")
+
+    try:
+        # 3. Update the document in MongoDB
+        result = mongo_collection.update_one({'_id': ObjectId(user_id)}, update_doc)
+        
+        if result.modified_count == 1:
+            # 4. Invalidate the Redis cache
+            redis_client.delete(f"user:{user_id}")
+            print(f"User stats for {user_id} updated in MongoDB and cache invalidated.")
+            return True
+        else:
+            print(f"User stats for {user_id} not modified.")
+            return False
+    except Exception as e:
+        print(f"Failed to update user stats for {user_id}: {e}")
+        return False
+
+# --- Example of how to use the new function in your main script block ---
+if __name__ == "__main__":
+    # ... (your existing main script to connect and log in) ...
+    users_collection = connect_to_mongodb(MONGO_URI, MONGO_DB_NAME, MONGO_COLLECTION_NAME)
+    redis_client = connect_to_redis(REDIS_HOST, REDIS_PORT, REDIS_DB)
+
+    if users_collection and redis_client:
+        # --- Simulating a game session and updating score ---
+        print("\n--- Simulating a game session and score update ---")
+        
+        # Assume a user is logged in and we have their user_id
+        # Let's find the user we registered earlier
+        user_name = "wurdo_player"
+        existing_user = users_collection.find_one({'user_name': user_name})
+        if existing_user:
+            user_id = str(existing_user['_id'])
+            
+            # --- Scenario 1: A new high score ---
+            game_results_1 = {
+                'game_chain': {
+                    'start_word': 'wurdo',
+                    'chain_length': 5,
+                    'words_in_chain': ['wurdo', 'urdo', 'rdo', 'do', 'o']
+                },
+                'game_score': 200
+            }
+            print(f"\nSubmitting first game results for user {user_id}...")
+            update_user_game_stats(users_collection, redis_client, user_id, game_results_1)
+            
+            # --- Scenario 2: A score that is NOT a high score ---
+            game_results_2 = {
+                'game_chain': {
+                    'start_word': 'less',
+                    'chain_length': 4,
+                    'words_in_chain': ['less', 'ess', 'ss', 's']
+                },
+                'game_score': 100
+            }
+            print(f"\nSubmitting second game results (not a high score)...")
+            update_user_game_stats(users_collection, redis_client, user_id, game_results_2)
+
+            # --- Verify the updates by fetching the user's data ---
+            print("\n--- Verifying the final user stats ---")
+            final_stats = users_collection.find_one({'_id': ObjectId(user_id)})
+            if final_stats:
+                # Remove password hash for safe printing
+                del final_stats['password_hash']
+                print(final_stats)
+                
 # --- Main Script Execution (for demonstration) ---
 if __name__ == "__main__":
     users_collection = connect_to_mongodb(MONGO_URI, MONGO_DB_NAME, MONGO_COLLECTION_NAME)
