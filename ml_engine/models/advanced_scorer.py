@@ -138,6 +138,111 @@ class AdvancedDistilGPT2Scorer:
         
         return results
     
+    def score_multiple_candidates_optimized(self, prompt: str, candidates: List[str]) -> Dict:
+        """
+        Score multiple candidates using ONE probability vector lookup.
+        Much more efficient than calling the model multiple times.
+        """
+        try:
+            # Get probability vector ONCE
+            logits, probs, prompt_tokens = self.get_logits_and_probs(prompt)
+            max_prob = probs.max().item()
+            
+            results = {
+                "prompt": prompt,
+                "candidates": candidates,
+                "scores": [],
+                "probability_vector_size": len(probs),
+                "max_probability": max_prob
+            }
+            
+            # Look up all candidates from the same probability vector
+            for candidate in candidates:
+                # Tokenize candidate
+                candidate_tokens = self.tokenizer.encode(candidate)
+                candidate_token = candidate_tokens[0]
+                
+                # Get candidate probability from the pre-computed vector
+                candidate_prob = probs[candidate_token].item()
+                
+                # Scale relative to max probability
+                normalized_prob = candidate_prob / max_prob
+                
+                # Creativity score
+                creativity_score = 1.0 - normalized_prob
+                
+                score_result = {
+                    "method": "probability_based_optimized",
+                    "prompt": prompt,
+                    "candidate_word": candidate,
+                    "candidate_token": candidate_token,
+                    "raw_probability": candidate_prob,
+                    "normalized_probability": normalized_prob,
+                    "creativity_score": creativity_score,
+                    "max_probability": max_prob
+                }
+                
+                results["scores"].append(score_result)
+            
+            # Sort by creativity score (highest first)
+            results["scores"].sort(key=lambda x: x["creativity_score"], reverse=True)
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Error in optimized scoring: {e}")
+            return {"error": str(e)}
+    
+    def get_probability_vector(self, prompt: str) -> Dict:
+        """
+        Get the full probability vector for a prompt.
+        This can be stored and used to look up ANY word's probability.
+        """
+        try:
+            logits, probs, prompt_tokens = self.get_logits_and_probs(prompt)
+            
+            return {
+                "prompt": prompt,
+                "probability_vector": probs.tolist(),
+                "max_probability": probs.max().item(),
+                "vocabulary_size": len(probs),
+                "prompt_tokens": prompt_tokens
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting probability vector: {e}")
+            return {"error": str(e)}
+    
+    def lookup_candidate_from_vector(self, probability_vector: List[float], candidate_word: str, max_prob: float) -> Dict:
+        """
+        Look up a candidate's probability from a pre-computed probability vector.
+        """
+        try:
+            # Tokenize candidate
+            candidate_tokens = self.tokenizer.encode(candidate_word)
+            candidate_token = candidate_tokens[0]
+            
+            # Get candidate probability from the vector
+            candidate_prob = probability_vector[candidate_token]
+            
+            # Scale relative to max probability
+            normalized_prob = candidate_prob / max_prob
+            
+            # Creativity score
+            creativity_score = 1.0 - normalized_prob
+            
+            return {
+                "candidate_word": candidate_word,
+                "candidate_token": candidate_token,
+                "raw_probability": candidate_prob,
+                "normalized_probability": normalized_prob,
+                "creativity_score": creativity_score
+            }
+            
+        except Exception as e:
+            logger.error(f"Error looking up candidate: {e}")
+            return {"error": str(e)}
+    
     def get_model_info(self) -> Dict:
         """Get information about the loaded model."""
         if not self.is_initialized:
