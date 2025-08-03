@@ -32,32 +32,3 @@ def build_word_deletion_map(word_list):
             word_deletion_map[original_word] = valid_deletions
             
     return word_deletion_map
-
-
-# --- Main Execution ---
-
-# 1. Get a valid list of English words
-# We'll use the 'web2' word list for this example.
-print("Loading word list...")
-word_set = get_english_words_set(['web2'], lower=True)
-print(f"Loaded {len(word_set)} words.")
-
-# Optional: Filter the list to a specific length range if needed for your game
-# filtered_word_set = {word for word in word_set if 3 <= len(word) <= 7}
-# print(f"Filtered to {len(filtered_word_set)} words of length 3-7.")
-
-# 2. Build the deletion map
-print("Building word deletion map...")
-deletion_map = build_word_deletion_map(word_set)
-print("Map built.")
-
-# 3. Test the function
-print("\n--- Testing the word deletion map ---")
-
-test_words = ["start", "stare", "scorn", "cat", "hello", "python"]
-
-for word in test_words:
-    if word in deletion_map:
-        print(f"Words that can be made by removing a letter from '{word}': {deletion_map[word]}")
-    else:
-        print(f"No valid words can be made by removing a letter from '{word}'.")
