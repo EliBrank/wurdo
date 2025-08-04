@@ -1,12 +1,13 @@
 "use client";
 import React from "react";
 import Navbar from "@/src/components/Navbar";
+import Footer from "@/src/components/Footer";
 
 export default function SettingsPage() {
   return (
     <div>
       <Navbar />
-      <main className="container mx-auto p-4">
+      <main className="container min-h-screen mx-auto p-4">
         {/* Desktop-only message */}
         <div className="hidden md:flex space-x-6 font-medium">
           <p>
@@ -24,6 +25,7 @@ export default function SettingsPage() {
           </ul>
         </section>
       </main>
+      <Footer />
     </div>
   );
 }
