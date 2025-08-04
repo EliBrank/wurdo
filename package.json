@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "csv-parser": "^3.2.0",
     "ioredis": "^5.7.0"
   }
 }

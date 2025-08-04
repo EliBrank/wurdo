@@ -16,6 +16,16 @@ export default class CommandHandler {
       return true;
     }
 
+    if (inputWord.length() > 7 || inputWord.length() < 3) {
+      console.log('Word must be between 3 and 7 characters');
+      return true;
+    }
+
+    if (inputWord in this.gameState.wordHistory) {
+      console.log('No word may be submitted twice');
+      return true;
+    }
+
     if (!(inputWord in words)) {
       console.log('Invalid word');
       return true;
