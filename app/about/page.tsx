@@ -16,7 +16,7 @@ export default function AboutPage() {
         </div>
         {/* Page Content */}
         <section>
-          <p className="md:hidden mt-2 p-4 space-y-2 rounded-3xl bg-amber-400">
+          <p className="md:hidden mt-2 p-4 space-y-2 rounded-3xl bg-(--background)">
             Würdo is a daily word ladder challenge where puzzle is unique. Play
             words that are one letter off, rhyme, or are anagrams to earn
             points. But be careful — once your energy bar runs out, the game is
