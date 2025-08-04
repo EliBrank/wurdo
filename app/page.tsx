@@ -2,6 +2,7 @@
 import Navbar from "../src/components/Navbar";
 import React from "react";
 import GameModeButton from "@/src/components/GameModeButton";
+import Footer from "@/src/components/Footer";
 
 export default function HomePage() {
   return (
@@ -14,12 +15,13 @@ export default function HomePage() {
             Desktop coming soon!
           </p>
         </div>
-        <section className="md:hidden flex flex-col items-center py-20">
+        <section className="md:hidden min-h-screen flex flex-col items-center py-20">
           <GameModeButton label="Daily" href="/play" />
           <GameModeButton label="Infinite" href="/play" />
           <GameModeButton label="Challenge" href="/play" />
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

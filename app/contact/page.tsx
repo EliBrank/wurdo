@@ -17,6 +17,7 @@ export default function ContactPage() {
         </div>
         {/* Page Content */}
         <section>
+          <h2 className="text-2xl font-bold text-white">Contact</h2>
           <p className="md:hidden mt-2 p-4 space-y-2 rounded-3xl bg-(--background)">
             Würdo was created as a capstone project by students Kelci Atkinson,
             Elias Brinkman, Isaac Edwards, Danny McGeough, and Nathan Rhys. You

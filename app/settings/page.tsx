@@ -16,6 +16,7 @@ export default function SettingsPage() {
         </div>
         {/* Page Content */}
         <section>
+          <h3 className="text-2xl font-bold text-white">Settings</h3>
           <ul>
             <li>Dark/Light mode</li>
             <li>Music</li>
