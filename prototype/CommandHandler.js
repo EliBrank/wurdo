@@ -21,7 +21,7 @@ export default class CommandHandler {
       return true;
     }
 
-    return this.evaluatePlay(inputWord)
+    return this.evaluatePlay(inputWord);
   }
 
   evaluatePlay(word) {
@@ -63,12 +63,13 @@ export default class CommandHandler {
     console.log(`Current Score: ${status.score}`);
     console.log(`Energy Meter: ${status.meterBar}`);
     console.log();
-    console.log('Available words:');;
-    console.log(Object.keys(words));
+    // console.log('Available words:');;
+    // console.log(Object.keys(words));
     console.log('===================================');
     console.log('Played Words:')
+    console.log();
     status.recentWords.forEach((word) => {
-      console.log(word);
+      console.log('\t', word);
     });
     console.log();
   }

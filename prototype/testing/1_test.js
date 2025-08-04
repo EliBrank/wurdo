@@ -1,4 +1,4 @@
-import words from './wordData.js';
+import words from '../wordData.js';
 
 const wordList = Object.keys(words);
 
