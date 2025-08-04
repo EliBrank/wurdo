@@ -84,7 +84,7 @@ class EnhancedScoringService:
         )
         
         # Initialize the production ONNX model
-        model_path = "distilgpt2_onnx/model.onnx"
+        model_path = str(Path(__file__).parent.parent / "distilgpt2_onnx" / "model.onnx")
         if not self.scorer.initialize(model_path):
             logger.warning(f"Failed to initialize ONNX model from {model_path}")
             logger.error("ONNX model initialization failed - no fallback available")

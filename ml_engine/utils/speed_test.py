@@ -20,8 +20,8 @@ from typing import Dict, Any
 import sys
 from pathlib import Path
 
-# Add services directory to path
-sys.path.append(str(Path(__file__).parent / "services"))
+# Add ml_engine directory to path so we can import from services and models
+sys.path.append(str(Path(__file__).parent.parent))
 
 from services.enhanced_scoring_service import get_enhanced_scoring_service
 
