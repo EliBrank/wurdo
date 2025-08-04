@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import Navbar from "@/src/components/Navbar";
+import Link from "next/link";
 
 export default function SettingsPage() {
   return (
@@ -17,6 +18,7 @@ export default function SettingsPage() {
         {/* Page Content */}
         <section>
           <p>Game Play coming soon!</p>
+          <Link href="/">Back</Link>
         </section>
       </main>
     </div>

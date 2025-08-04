@@ -24,13 +24,13 @@ export default function Navbar() {
         <ul className="md:hidden mt-2 p-4 space-y-2">
           <li></li>
           <li>
-            <a href="/about">About</a>
+            <Link href="/about">About</Link>
           </li>
           <li>
-            <a href="/contact">Contact</a>
+            <Link href="/contact">Contact</Link>
           </li>
           <li>
-            <a href="/settings">Settings</a>
+            <Link href="/settings">Settings</Link>
           </li>
         </ul>
       )}
