@@ -14,7 +14,7 @@ export default function HomePage() {
             Desktop coming soon!
           </p>
         </div>
-        <section className="md:hidden flex flex-col items-center py-4">
+        <section className="md:hidden flex flex-col items-center py-20">
           <GameModeButton label="Daily" href="/play" />
           <GameModeButton label="Infinite" href="/play" />
           <GameModeButton label="Challenge" href="/play" />
