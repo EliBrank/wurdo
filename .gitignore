@@ -197,7 +197,7 @@ ml_engine/utils/__pycache__/
 *.joblib
 *.h5
 *.hdf5
-*.onnx
+#*.onnx
 *.pt
 *.pth
 *.bin
@@ -210,7 +210,7 @@ huggingface/
 
 # Large data files
 *.csv
-*.json
+#*.json
 *.txt
 !requirements.txt
 !package.json
@@ -232,3 +232,6 @@ logs/
 *.temp
 temp/
 tmp/
+
+# Development Archive (preserved for retrospective analysis)
+ml_engine/development_archive/

@@ -3,7 +3,7 @@ Shared word engine singleton to eliminate duplicate loading
 """
 
 import logging
-from efficient_word_engine import EfficientWordEngine
+from .efficient_word_engine import EfficientWordEngine
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,10 @@ def get_shared_word_engine() -> EfficientWordEngine:
     
     if _global_word_engine is None:
         logger.info("Initializing shared word engine...")
-        _global_word_engine = EfficientWordEngine()
+        # Use absolute path to game_data directory
+        from pathlib import Path
+        game_data_path = Path(__file__).parent.parent / "game_data"
+        _global_word_engine = EfficientWordEngine(package_dir=str(game_data_path))
         logger.info("Shared word engine initialized")
     
     return _global_word_engine

@@ -19,6 +19,9 @@ import math
 from collections import defaultdict, Counter
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
+import sys
+
+sys.path.append(str(Path(__file__).parent.parent))
 import wordfreq
 
 class CanonicalDataGenerator:
@@ -32,7 +35,7 @@ class CanonicalDataGenerator:
     - Consistent word quality
     """
     
-    def __init__(self, csv_path: str = "../scripts/data.csv", output_dir: str = "game_data"):
+    def __init__(self, csv_path: str = "scripts/data.csv", output_dir: str = "ml_engine/game_data"):
         self.csv_path = Path(csv_path)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
@@ -267,28 +270,10 @@ class CanonicalDataGenerator:
         savings = (original_size_estimate - total_size/1024) / original_size_estimate * 100
         print(f"💰 Package size reduction: ~{savings:.1f}%")
 
-def demonstrate_canonical_generation():
-    """Demonstrate canonical data generation."""
-    
-    print("🎯 CANONICAL DATA GENERATION DEMO")
-    print("=" * 60)
-    
-    # Generate canonical package data
+def main():
+    """Main function to run the generator."""
     generator = CanonicalDataGenerator()
     generator.generate_canonical_data()
-    
-    # Show what we've created
-    print(f"\n📦 PACKAGE FILES CREATED:")
-    for file_path in generator.output_dir.glob("*"):
-        if file_path.is_file():
-            size_kb = file_path.stat().st_size / 1024
-            print(f"   ✅ {file_path.name} ({size_kb:.1f} KB)")
-    
-    print(f"\n🚀 READY FOR PACKAGE INTEGRATION!")
-    print(f"   - Replace pronouncing.cmudict.words() with words.txt")
-    print(f"   - Use frequencies.json for creativity scoring")
-    print(f"   - Use anagrams.json for ultra-fast anagram lookup")
-    print(f"   - 97%+ package size reduction achieved")
 
 if __name__ == "__main__":
-    demonstrate_canonical_generation() 
+    main() 

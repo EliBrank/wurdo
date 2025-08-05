@@ -15,11 +15,11 @@ from dataclasses import dataclass
 from pathlib import Path
 import sys
 
-# Add models directory to path
-sys.path.append(str(Path(__file__).parent.parent / "models"))
+# Add ml_engine root to path for imports
+sys.path.append(str(Path(__file__).parent.parent))
 
 from models.shared_word_engine import get_shared_word_engine
-from production_onnx_scorer import get_onnx_scorer
+from models.production_onnx_scorer import get_onnx_scorer
 
 logger = logging.getLogger(__name__)
 

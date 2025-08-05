@@ -1,480 +1,313 @@
 #!/usr/bin/env python3
+"""
+Enhanced Scoring Game with Visual Interface
+==========================================
+
+A word transformation game with visual score meters and detailed feedback.
+"""
+
 import sys
-import os
 import asyncio
-import time
-import random
 import json
-import datetime
-from typing import Optional
+import os
 from pathlib import Path
+from typing import List, Dict, Any, Optional
+from dataclasses import dataclass
+from datetime import datetime
 
-sys.path.append("/app")
+# Add ml_engine to path
+sys.path.append(str(Path(__file__).parent))
 
-def print_title_card():
-    """Print the retro-gaming style title card"""
-    title_art = """
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                                                                              ║
-║    ██╗    ██╗██╗   ██╗██████╗ ██████╗  ██████╗                          ║
-║    ██║    ██║██║   ██║██╔══██╗██╔══██╗██╔═══██╗                          ║
-║    ██║ █╗ ██║██║   ██║██████╔╝██║  ██║██║   ██║                          ║
-║    ██║███╗██║██║   ██║██╔══██╗██║  ██║██║   ██║                          ║
-║    ╚███╔███╔╝╚██████╔╝██║  ██║██████╔╝╚██████╔╝                          ║
-║     ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═════╝  ╚═════╝                           ║
-║                                                                              ║
-║                    ✧ Transform • Anagram • Rhyme • One-Letter-Off ✧        ║
-║                                                                              ║
-║                         Slant rhymes = bonus points!                        ║
-║                           Low stakes, high fun!                            ║
-║                                                                              ║
-║                              atlas_school 2005                              ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-"""
-    print(title_art)
+from services.enhanced_scoring_service import get_enhanced_scoring_service
 
-def print_loading_animation():
-    """Print a retro loading animation"""
-    loading_chars = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
-    for i in range(20):
-        char = loading_chars[i % len(loading_chars)]
-        print(f"\r{char} Loading ML Engine... {i*5}%", end="", flush=True)
-        time.sleep(0.1)
-    print("\r✅ ML Engine Ready!    100%")
-
-def print_score_display(start_word: str, candidate_word: str, score_result):
-    """Print the score results in a retro style"""
-    print("\n" + "═" * 60)
-    print("📊 SCORE RESULTS")
-    print("═" * 60)
-    
-    # Check if the result is successful
-    if not score_result.get("success", False):
-        print(f"❌ Error: {score_result.get('message', 'Unknown error')}")
-        print("═" * 60)
-        return False
-    
-    # Get data from the result
-    data = score_result.get("data", {})
-    
-    # Create a visual score bar
-    best_score = data.get("best_score", 0)
-    creativity_score = data.get("creativity_score", 0)
-    overall_percent = int(creativity_score * 100)
-    bar_length = 40
-    filled_length = int(bar_length * creativity_score)
-    bar = "█" * filled_length + "░" * (bar_length - filled_length)
-    
-    print(f"🎯 {start_word.upper()} → {candidate_word.upper()}")
-    print(f"🏆 Best Score: {best_score:.2f}")
-    print(f"🎨 Creativity: {creativity_score:.4f} ({overall_percent}%)")
-    print(f"   [{bar}]")
-    print()
-    
-    # Show category breakdown
-    all_scores = data.get("all_category_scores", {})
-    if all_scores:
-        print("📊 Category Breakdown:")
-        for category, score in all_scores.items():
-            percent = int((score / 1500.0) * 100)  # Normalize to percentage
-            bar_length = 25
-            filled_length = int(bar_length * (score / 1500.0))
-            bar = "█" * filled_length + "░" * (bar_length - filled_length)
-            print(f"   {category.upper():4} {score:6.1f} ({percent:3}%) [{bar}]")
-    
-    print("═" * 60)
-    return True
-
-def print_instructions():
-    """Print game instructions in retro style"""
-    instructions = """
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                              HOW TO PLAY                                    ║
-╠══════════════════════════════════════════════════════════════════════════════╣
-║                                                                              ║
-║  🎯 Enter a START WORD (e.g., 'xylophone')                                 ║
-║  🎯 Enter up to 5 CANDIDATE WORDS (e.g., 'telephone')                      ║
-║  📊 See the creativity score breakdown for each                            ║
-║  🔄 DYNAMIC GAMEPLAY: Your last valid word becomes the new start word!     ║
-║  🚫 DUPLICATE PREVENTION: You cannot use the same word twice!              ║
-║  🚪 Type 'quit' to exit, 'new' for a new word                             ║
-║                                                                              ║
-║  Categories:                                                                ║
-║  🔤 Ana - Anagram transformations                                           ║
-║  🔀 Olo - One-letter-off transformations                                   ║
-║  🎵 Rhy - Rhyme transformations                                             ║
-║  📊 Frq - Frequency-based scoring                                          ║
-║  ⭐ Prf - Perfect rhyme bonus                                               ║
-║                                                                              ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-"""
-    print(instructions)
-
-def get_input_with_prompt(prompt: str) -> Optional[str]:
-    """Get user input with retro styling"""
-    try:
-        user_input = input(f"\n{prompt} ").strip().lower()
-        if user_input == 'quit':
-            return None
-        return user_input
-    except KeyboardInterrupt:
-        return None
+@dataclass
+class PlayResult:
+    """Result of a single play."""
+    word: str
+    categories: List[str]
+    category_scores: Dict[str, float]
+    total_score: float
+    avg_creativity_score: float
+    contribution_percentage: float
 
 class ScoringGame:
-    """Enhanced scoring game with 5-word sessions and dynamic gameplay."""
+    """Enhanced scoring game with visual interface."""
     
     def __init__(self):
         """Initialize the game."""
-        self.scoring_service = None
+        self.scoring_service = get_enhanced_scoring_service()
         self.current_word = None
-        self.candidates_entered = 0
-        self.max_candidates = 5
+        self.session_words = []
+        self.session_scores = []
+        self.total_session_score = 0.0
+        self.max_session_turns = 7
         
-        # Track used words to prevent duplicates
-        self.used_words = set()
-        self.initial_start_word = None
-        
-        # Data storage
-        self.game_data_file = Path("scoring_game_results.json")
-        self.session_data = {
-            "sessions": [],
-            "total_sessions": 0,
-            "total_candidates": 0,
-            "last_updated": datetime.datetime.now().isoformat()
-        }
-        self.current_session = {
-            "session_id": None,
-            "start_word": None,
-            "candidates": [],
-            "session_score": 0,
-            "timestamp": None
-        }
-        
-        # Load existing data
+        # Game data file
+        self.game_data_file = "game_data/scoring_game_data.json"
         self.load_game_data()
     
     def load_game_data(self):
-        """Load existing game data."""
-        if self.game_data_file.exists():
-            try:
+        """Load game data from file."""
+        try:
+            if os.path.exists(self.game_data_file):
                 with open(self.game_data_file, 'r') as f:
-                    self.session_data = json.load(f)
-                print(f"📊 Loaded {self.session_data['total_sessions']} previous sessions")
-            except Exception as e:
-                print(f"⚠️ Could not load existing data: {e}")
+                    data = json.load(f)
+                    self.session_words = data.get('session_words', [])
+                    self.session_scores = data.get('session_scores', [])
+                    self.total_session_score = data.get('total_session_score', 0.0)
+                    self.current_word = data.get('current_word', None)
+        except Exception as e:
+            print(f"⚠️ Could not load game data: {e}")
     
     def save_game_data(self):
         """Save game data to file."""
         try:
-            self.session_data["last_updated"] = datetime.datetime.now().isoformat()
+            os.makedirs(os.path.dirname(self.game_data_file), exist_ok=True)
             with open(self.game_data_file, 'w') as f:
-                json.dump(self.session_data, f, indent=2)
+                json.dump({
+                    'session_words': self.session_words,
+                    'session_scores': self.session_scores,
+                    'total_session_score': self.total_session_score,
+                    'current_word': self.current_word,
+                    'last_updated': datetime.now().isoformat()
+                }, f, indent=2)
         except Exception as e:
-            print(f"❌ Error saving data: {e}")
+            print(f"⚠️ Could not save game data: {e}")
     
-    def start_new_session(self, reset_used_words=True):
+    def start_new_session(self):
         """Start a new game session."""
-        session_id = f"session_{self.session_data['total_sessions'] + 1}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        
-        self.current_session = {
-            "session_id": session_id,
-            "start_word": None,
-            "candidates": [],
-            "session_score": 0,
-            "timestamp": datetime.datetime.now().isoformat()
-        }
-        
-        # Only reset used words if we're starting completely fresh
-        if reset_used_words:
-            self.used_words = set()
-            self.initial_start_word = None
-        
-        print(f"🎯 Starting session: {session_id}")
+        self.session_words = []
+        self.session_scores = []
+        self.total_session_score = 0.0
+        self.current_word = self.get_start_word()
+        self.save_game_data()
+        print("🎮 New session started!")
     
-    def get_start_word(self, previous_valid_word=None):
-        """Get a start word for the game."""
-        if previous_valid_word:
-            # Use the previous valid word as the new start word
-            self.current_word = previous_valid_word
-            # Add to used words and update session
-            self.used_words.add(self.current_word)
-            self.current_session["start_word"] = self.current_word
-            print(f"\n🎯 New start word (from previous valid word): '{self.current_word}'")
-            return
-        
-        # You can customize this list or make it random
-        start_words = [
-            "cat", "hat", "dog", "run", "play", "computer", 
-            "algorithm", "beautiful", "mountain", "ocean"
-        ]
-        
-        print("📝 Choose a start word:")
-        for i, word in enumerate(start_words, 1):
-            print(f"  {i}. {word}")
-        print("  Or type your own word:")
-        
-        choice = input("Enter choice (1-10) or word: ").strip()
-        
-        if choice.isdigit() and 1 <= int(choice) <= len(start_words):
-            self.current_word = start_words[int(choice) - 1]
-        else:
-            self.current_word = choice if choice else "cat"  # Default to "cat" if empty
-        
-        # Track the initial start word and add it to used words
-        self.initial_start_word = self.current_word
-        self.used_words.add(self.current_word)
-        
-        self.current_session["start_word"] = self.current_word
-        print(f"\n🎯 Start word: '{self.current_word}'")
-        print("=" * 50)
+    def get_start_word(self) -> str:
+        """Get a start word from user or use default."""
+        print("\n🎯 Enter a start word (or press Enter for 'cat'):")
+        choice = input("> ").strip().lower()
+        return choice if choice else "cat"
     
-    def display_transformation_hints(self):
-        """Display hints for possible transformations."""
-        print("💡 Possible transformation types:")
-        print("  • Perfect rhymes (e.g., cat → hat)")
-        print("  • Rich rhymes/homophones (e.g., cat → kat)")
-        print("  • Slant rhymes (e.g., cat → bat)")
-        print("  • Anagrams (e.g., cat → act)")
-        print("  • One-letter-off (added/removed/changed)")
-        print()
-    
-    async def score_candidate(self, candidate_word: str):
-        """Score a candidate word and display results."""
-        print(f"\n🔍 Scoring '{candidate_word}'...")
+    def display_score_meter(self, current_score: float, max_score: float = 5000):
+        """Display a visual score meter."""
+        percentage = min(current_score / max_score, 1.0)
+        bar_length = 50
+        filled_length = int(bar_length * percentage)
         
-        # Check if word has already been used
-        if candidate_word in self.used_words:
-            print(f"❌ WORD ALREADY USED!")
-            print(f"   '{candidate_word}' has already been played or was the initial start word.")
-            print(f"   Try a different word!")
-            print("-" * 50)
+        bar = "█" * filled_length + "░" * (bar_length - filled_length)
+        
+        print(f"\n📊 Score Meter: {current_score:.0f} / {max_score}")
+        print(f"   [{bar}] {percentage*100:.1f}%")
+    
+    def display_contribution_bar(self, contribution: float, max_contribution: float = 500):
+        """Display a bar showing the contribution of the last play."""
+        percentage = min(contribution / max_contribution, 1.0)
+        bar_length = 30
+        filled_length = int(bar_length * percentage)
+        
+        bar = "█" * filled_length + "░" * (bar_length - filled_length)
+        
+        print(f"🎯 Last Play Contribution: {contribution:.0f} points")
+        print(f"   [{bar}] {percentage*100:.1f}%")
+    
+    def display_session_progress(self):
+        """Display current session progress."""
+        turns_remaining = self.max_session_turns - len(self.session_words)
+        print(f"\n🔄 Session Progress: {len(self.session_words)}/{self.max_session_turns} turns")
+        print(f"   Turns remaining: {turns_remaining}")
+        
+        if self.session_words:
+            print(f"   Words played: {', '.join(self.session_words)}")
+    
+    async def score_candidate(self, candidate_word: str) -> Optional[PlayResult]:
+        """Score a candidate word and return detailed result."""
+        if not self.current_word:
+            print("❌ No current word set!")
             return None
         
-        # Get comprehensive scoring
-        result = await self.scoring_service.score_candidate_comprehensive(self.current_word, candidate_word)
-        
-        candidate_data = {
-            "word": candidate_word,
-            "timestamp": datetime.datetime.now().isoformat(),
-            "result": result
-        }
-        
-        if result["success"]:
+        try:
+            # Get comprehensive score
+            result = await self.scoring_service.score_candidate_comprehensive(
+                self.current_word, candidate_word
+            )
+            
+            if not result["success"]:
+                print(f"❌ {result['message']}")
+                return None
+            
             data = result["data"]
             
-            # Store candidate data
-            candidate_data["score"] = data["best_score"]
-            candidate_data["category"] = data["best_category"]
-            candidate_data["creativity"] = data["creativity_score"]
-            candidate_data["probability"] = data["full_probability"]
+            # Calculate contribution percentage
+            total_score = data["total_score"]
+            contribution_percentage = (total_score / 5000) * 100  # Assuming max score of 5000
             
-            # Update session score
-            self.current_session["session_score"] += data["best_score"]
+            return PlayResult(
+                word=candidate_word,
+                categories=data["valid_categories"],
+                category_scores=data["category_scores"],
+                total_score=total_score,
+                avg_creativity_score=data["avg_creativity_score"],
+                contribution_percentage=contribution_percentage
+            )
             
-            # Add to used words
-            self.used_words.add(candidate_word)
-            
-            # Update current_word to the valid word for the next play
-            self.current_word = candidate_word
-            self.current_session["start_word"] = self.current_word
-            
-            print(f"✅ VALID TRANSFORMATION!")
-            print(f"   Word: '{candidate_word}'")
-            print(f"   Category: {data['best_category'].upper()}")
-            print(f"   Total Score: {data['best_score']:.1f}")
-            print(f"   Creativity: {data['creativity_score']:.4f}")
-            print(f"   Probability: {data['full_probability']:.8f}")
-            print(f"   Base Score: {data['base_score']:.1f}")
-            print(f"   Category Bonus: {data['category_bonus']:.1f}")
-            
-            # Show all category scores
-            print(f"   All Categories:")
-            for category, score in data['all_category_scores'].items():
-                print(f"     {category.upper()}: {score:.1f}")
-            
-            # Show token analysis
-            token_analysis = data['token_analysis']
-            print(f"   Token Analysis:")
-            print(f"     Tokens: {token_analysis['token_count']}")
-            if 'prompt' in token_analysis:
-                print(f"     Prompt: '{token_analysis['prompt']}'")
-            if 'using_probability_tree' in token_analysis:
-                print(f"     Method: {'Probability Tree' if token_analysis['using_probability_tree'] else 'ML Model'}")
-            if 'tree_category' in token_analysis:
-                print(f"     Tree Category: {token_analysis['tree_category']}")
-            
-            # Store candidate data
-            self.current_session["candidates"].append(candidate_data)
-            
-            print("-" * 50)
-            
-            # Return the valid word for potential use as new start word
-            return candidate_word
-            
-        else:
-            print(f"❌ INVALID TRANSFORMATION")
-            print(f"   Error: {result['message']}")
-            candidate_data["error"] = result["message"]
-            
-            # Store candidate data even for invalid attempts
-            self.current_session["candidates"].append(candidate_data)
-            
-            print("-" * 50)
-            
-            return None
-    
-    def end_session(self):
-        """End the current session and save data."""
-        if self.current_session["session_id"]:
-            # Add session to data
-            self.session_data["sessions"].append(self.current_session)
-            self.session_data["total_sessions"] += 1
-            self.session_data["total_candidates"] += len(self.current_session["candidates"])
-            
-            # Save data
-            self.save_game_data()
-            
-            # Display session summary
-            print(f"\n📊 SESSION SUMMARY:")
-            print(f"   Session ID: {self.current_session['session_id']}")
-            print(f"   Start Word: '{self.current_session['start_word']}'")
-            print(f"   Candidates: {len(self.current_session['candidates'])}")
-            print(f"   Total Score: {self.current_session['session_score']:.1f}")
-            print(f"   Average Score: {self.current_session['session_score'] / len(self.current_session['candidates']):.1f}" if self.current_session['candidates'] else "   Average Score: 0.0")
-    
-    async def play_round(self, previous_valid_word=None):
-        """Play one round of the game."""
-        # Only reset used words if we're starting fresh (no previous valid word)
-        reset_used_words = previous_valid_word is None
-        self.start_new_session(reset_used_words=reset_used_words)
-        self.get_start_word(previous_valid_word)
-        self.display_transformation_hints()
-        
-        self.candidates_entered = 0
-        last_valid_word = None
-        
-        while self.candidates_entered < self.max_candidates:
-            remaining = self.max_candidates - self.candidates_entered
-            print(f"\n📝 Enter candidate word ({remaining} remaining):")
-            print("   (or type 'quit' to exit, 'new' for new word)")
-            
-            # Show used words if any
-            if self.used_words:
-                used_list = ", ".join(sorted(self.used_words))
-                print(f"   Used words: {used_list}")
-            
-            candidate = input("> ").strip().lower()
-            
-            if candidate == "quit":
-                self.end_session()
-                return False
-            elif candidate == "new":
-                self.end_session()
-                return "NEW_SESSION"  # Continue to next round with new word
-            elif candidate == "":
-                continue
-            else:
-                valid_word = await self.score_candidate(candidate)
-                if valid_word:
-                    last_valid_word = valid_word  # Track the last valid word
-                self.candidates_entered += 1
-        
-        print(f"\n🎉 Round complete! You entered {self.candidates_entered} candidates.")
-        self.end_session()
-        
-        # Return the last valid word for use as next start word
-        return last_valid_word
-    
-    def display_statistics(self):
-        """Display game statistics."""
-        if self.session_data["total_sessions"] > 0:
-            print(f"\n📈 GAME STATISTICS:")
-            print(f"   Total Sessions: {self.session_data['total_sessions']}")
-            print(f"   Total Candidates: {self.session_data['total_candidates']}")
-            print(f"   Last Updated: {self.session_data['last_updated']}")
-            
-            # Calculate average scores
-            total_score = sum(session["session_score"] for session in self.session_data["sessions"])
-            avg_session_score = total_score / self.session_data["total_sessions"]
-            print(f"   Average Session Score: {avg_session_score:.1f}")
-    
-    async def play(self):
-        """Main game loop."""
-        print("🎯 WELCOME TO THE SCORING GAME!")
-        print("=" * 50)
-        print("Rules:")
-        print("• You'll be given a start word")
-        print("• Enter up to 5 candidate transformation words")
-        print("• See real-time scoring for each candidate")
-        print("• Type 'quit' to exit, 'new' for a new word")
-        print("• All scoring data will be saved automatically")
-        print("• 🆕 DYNAMIC GAMEPLAY: Your last valid word becomes the new start word!")
-        print("• 🚫 DUPLICATE PREVENTION: You cannot use the same word twice!")
-        print()
-        
-        self.display_statistics()
-        
-        previous_valid_word = None
-        
-        while True:
-            print("\n" + "=" * 50)
-            last_valid_word = await self.play_round(previous_valid_word)
-            
-            if last_valid_word is False:  # User quit
-                break
-            
-            if last_valid_word == "NEW_SESSION":
-                # User requested new session, start fresh
-                previous_valid_word = None
-                print("\n🔄 Starting fresh with a new word.")
-            elif last_valid_word:
-                # Use the last valid word as the start word for the next round
-                previous_valid_word = last_valid_word
-                print(f"\n🔄 Using '{last_valid_word}' as the new start word for the next round!")
-            else:
-                # No valid words in this round, start fresh
-                previous_valid_word = None
-                print("\n🔄 No valid words entered. Starting fresh with a new word.")
-            
-            print("\n🎮 Starting new round...")
-        
-        print("\n👋 Thanks for playing the Scoring Game!")
-        print(f"📁 Your data is saved in: {self.game_data_file}")
+        except Exception as e:
+            print(f"❌ Error scoring word: {e}")
+        return None
 
-async def run_scoring_game():
-    """Main game loop with retro styling"""
-    try:
-        # Clear screen and show title
-        os.system('clear' if os.name == 'posix' else 'cls')
-        print_title_card()
+    def display_detailed_score(self, result: PlayResult):
+        """Display detailed score breakdown."""
+        print(f"\n🎯 Score Breakdown for '{result.word}':")
+        print(f"   Categories: {', '.join(result.categories).upper()}")
+        print(f"   Category Count: {len(result.categories)}")
         
-        # Show loading animation
-        print_loading_animation()
+        # Show individual category scores
+        for category, score in result.category_scores.items():
+            print(f"   {category.upper()}: {score:.0f} points")
         
-        # Import and initialize scoring service
-        from services.enhanced_scoring_service import get_enhanced_scoring_service
-        scoring_service = get_enhanced_scoring_service()
+        print(f"   Total Score: {result.total_score:.0f}")
+        print(f"   Avg Creativity: {result.avg_creativity_score:.3f}")
         
-        # Initialize game
-        game = ScoringGame()
-        game.scoring_service = scoring_service
+        # Display contribution bar
+        self.display_contribution_bar(result.total_score)
+    
+    def display_final_summary(self):
+        """Display final session summary with all words and their contributions."""
+        if not self.session_words:
+            print("❌ No words played in this session!")
+            return
         
-        # Show instructions
-        print_instructions()
+        print("\n" + "="*80)
+        print("🏆 FINAL SESSION SUMMARY")
+        print("="*80)
         
-        # Start the game
-        await game.play()
+        # Display overall score meter
+        self.display_score_meter(self.total_session_score)
         
-        # Farewell message
-        print("\n" + "═" * 60)
-        print("🎉 Thanks for testing the ML Engine!")
-        print("   WÜRDO - Where words become magic!")
-        print("═" * 60)
+        print(f"\n📝 Words Played (in order):")
+        print("-" * 80)
         
-    except Exception as e:
-        print(f"❌ Failed to start game: {e}")
-        sys.exit(1)
+        # Header
+        print(f"{'Word':<15} {'Categories':<20} {'Total':<8} {'Contribution':<15}")
+        print("-" * 80)
+        
+        # Display each word with its contribution
+        for i, (word, score_data) in enumerate(zip(self.session_words, self.session_scores)):
+            contribution_percentage = (score_data["total_score"] / self.total_session_score) * 100
+            contribution_bar = "█" * int(contribution_percentage / 2) + "░" * (50 - int(contribution_percentage / 2))
+            
+            categories_str = ", ".join(score_data['categories']).upper()
+            print(f"{word:<15} {categories_str:<20} {score_data['total_score']:<8.0f} "
+                  f"[{contribution_bar}] {contribution_percentage:.1f}%")
+        
+        print("-" * 80)
+        print(f"🎯 Total Session Score: {self.total_session_score:.0f}")
+        print(f"📊 Average Score per Word: {self.total_session_score / len(self.session_words):.0f}")
+        
+        # Show best and worst words
+        if self.session_scores:
+            best_word = max(self.session_scores, key=lambda x: x["total_score"])
+            worst_word = min(self.session_scores, key=lambda x: x["total_score"])
+            
+            print(f"\n🏅 Best Word: '{best_word['word']}' ({best_word['total_score']:.0f} points)")
+            print(f"📉 Worst Word: '{worst_word['word']}' ({worst_word['total_score']:.0f} points)")
+    
+    async def play_round(self) -> str:
+        """Play a single round."""
+        print(f"\n🎯 Current word: '{self.current_word}'")
+        self.display_session_progress()
+        
+        # Show score meter
+        self.display_score_meter(self.total_session_score)
+        
+        print(f"\n💡 Enter a transformation of '{self.current_word}' (or 'new' for new session, 'quit' to exit):")
+        candidate = input("> ").strip().lower()
+        
+        if candidate == "quit":
+            return "QUIT"
+        elif candidate == "new":
+            return "NEW_SESSION"
+        elif not candidate:
+            print("❌ Please enter a word!")
+            return "CONTINUE"
+        
+        # Score the candidate
+        result = await self.score_candidate(candidate)
+        if not result:
+            return "CONTINUE"
+        
+        # Display detailed score
+        self.display_detailed_score(result)
+        
+        # Update session
+        self.session_words.append(candidate)
+        self.session_scores.append({
+            "word": candidate,
+            "categories": result.categories,
+            "category_scores": result.category_scores,
+            "total_score": result.total_score,
+            "avg_creativity_score": result.avg_creativity_score
+        })
+        self.total_session_score += result.total_score
+        
+        # Update current word for next turn
+        self.current_word = candidate
+        
+        # Save game data
+        self.save_game_data()
+        
+        print(f"\n✅ '{candidate}' scored! Added {result.total_score:.0f} points to your session.")
+        
+        # Check if session is complete
+        if len(self.session_words) >= self.max_session_turns:
+            print(f"\n🎉 Session complete! You've played {self.max_session_turns} words.")
+            self.display_final_summary()
+            return "SESSION_COMPLETE"
+        
+        return "CONTINUE"
+    
+    def print_instructions(self):
+        """Print game instructions."""
+        print("🎮 ENHANCED SCORING GAME")
+        print("=" * 50)
+        print("Transform words and earn points based on creativity!")
+        print()
+        print("📋 How to play:")
+        print("   • Enter a transformation of the current word")
+        print("   • Valid transformations: rhymes, anagrams, one-letter changes")
+        print("   • Earn points based on creativity and transformation difficulty")
+        print("   • Play 7 words to complete a session")
+        print()
+        print("🎯 Scoring:")
+        print("   • Base Score: 500-1000 points (based on creativity)")
+        print("   • Category Bonus: Additional points for harder transformations")
+        print("   • Anagrams: Highest bonus (250 max)")
+        print("   • Perfect Rhymes: Lowest bonus (100 max)")
+        print()
+        print("💡 Commands:")
+        print("   • 'new': Start a new session")
+        print("   • 'quit': Exit the game")
+        print()
+
+def main():
+    """Main game loop."""
+    game = ScoringGame()
+    game.print_instructions()
+    
+    # Start new session
+    game.start_new_session()
+    
+    while True:
+        result = asyncio.run(game.play_round())
+        
+        if result == "QUIT":
+            print("\n👋 Thanks for playing!")
+            break
+        elif result == "NEW_SESSION":
+            game.start_new_session()
+        elif result == "SESSION_COMPLETE":
+            print("\n🔄 Starting new session...")
+            game.start_new_session()
 
 if __name__ == "__main__":
-    asyncio.run(run_scoring_game()) 
+    main() 

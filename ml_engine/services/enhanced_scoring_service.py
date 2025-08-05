@@ -15,8 +15,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import sys
 
-# Add models directory to path
-sys.path.append(str(Path(__file__).parent.parent / "models"))
+# Add ml_engine root to path for absolute imports
+sys.path.append(str(Path(__file__).parent.parent))
 
 from services.efficient_word_service import EfficientWordService
 from models.production_onnx_scorer import get_onnx_scorer
@@ -62,12 +62,24 @@ class EnhancedScoringService:
     4. Handles multi-token words correctly
     """
     
-    def __init__(self, model_name: str = "distilgpt2", device: str = "cpu", storage_type: str = "json", json_file_path: str = "probability_trees.json"):
-        """Initialize the enhanced scoring service with optimized probability trees."""
-        self.word_service = EfficientWordService(model_name, device)
-        self.scorer = get_onnx_scorer(model_name, device)
+    def __init__(self, model_name: str = "distilgpt2", device: str = "cpu", storage_type: str = "json", json_file_path: str = None):
+        """
+        Initialize enhanced scoring service with optimized storage.
         
-        # Initialize optimized storage service
+        Args:
+            model_name: Name of the ML model to use
+            device: Device to run model on ('cpu' or 'cuda')
+            storage_type: Storage backend ('json' or 'redis')
+            json_file_path: Path to JSON storage file (defaults to main game_data location)
+        """
+        # Set default path to main game_data location
+        if json_file_path is None:
+            json_file_path = str(Path(__file__).parent.parent / "game_data" / "probability_trees.json")
+        
+        self.model_name = model_name
+        self.device = device
+        
+        # Initialize storage with optimized configuration
         storage_config = StorageConfig(
             storage_type=storage_type,
             json_file_path=json_file_path,
@@ -75,6 +87,10 @@ class EnhancedScoringService:
             cache_size=1000
         )
         self.storage = get_optimized_storage_service(storage_config)
+        
+        # Initialize word service and scorer
+        self.word_service = EfficientWordService(model_name, device)
+        self.scorer = get_onnx_scorer(model_name, device)
         
         # Initialize probability tree builder
         self.tree_builder = ProbabilityTreeBuilder(
@@ -150,7 +166,8 @@ class EnhancedScoringService:
     
     def calculate_multi_token_probability(self, prompt: str, candidate_word: str, valid_tokens: List[int] = None) -> MultiTokenProbability:
         """
-        Calculate full conditional probability for a multi-token word using progressive context building.
+        Calculate full conditional probability for a multi-token word using progressive context building
+        with layer-by-layer RMS normalization to prevent vanishing gradient.
         
         Args:
             prompt: Context prompt for the transformation category
@@ -171,33 +188,42 @@ class EnhancedScoringService:
                 creativity_score=0.0
             )
         
-        # Calculate conditional probabilities for each token with progressive context
+        # Calculate probabilities for each token with progressive context
+        # and layer-by-layer RMS normalization using RAW probabilities
         token_probabilities = []
         conditional_probabilities = []
-        full_probability = 1.0
         current_context = prompt
+        
+        # Layer-by-layer RMS tracking using raw probabilities
+        current_rms = 0.0
+        layer_count = 0
         
         for i, token in enumerate(candidate_tokens):
             # Get probability vector for current context
             prob_vector_data = self.scorer.get_probability_vector(current_context)
             probability_vector = prob_vector_data["probability_vector"]
             
-            # Get probability for this token in current context
-            token_prob = probability_vector[token]
+            # Get RAW probability for this token in current context
+            raw_token_prob = probability_vector[token]
             
-            # Scale probability based on valid tokens if provided
+            # Store raw token probability
+            token_probabilities.append(raw_token_prob)
+            
+            # Calculate conditional probability for compatibility (but don't use for RMS)
             if valid_tokens is not None:
                 # Calculate sum of probabilities for valid tokens only
                 valid_prob_sum = sum(probability_vector[t] for t in valid_tokens if t < len(probability_vector))
-                conditional_prob = token_prob / valid_prob_sum if valid_prob_sum > 0 else 0.0
+                conditional_prob = raw_token_prob / valid_prob_sum if valid_prob_sum > 0 else 0.0
             else:
                 # Fallback to max probability scaling (original behavior)
                 max_prob = prob_vector_data["max_probability"]
-                conditional_prob = token_prob / max_prob if max_prob > 0 else 0.0
+                conditional_prob = raw_token_prob / max_prob if max_prob > 0 else 0.0
             
-            token_probabilities.append(token_prob)
             conditional_probabilities.append(conditional_prob)
-            full_probability *= conditional_prob
+            
+            # Apply layer-by-layer RMS normalization using RAW probabilities
+            layer_count += 1
+            current_rms = ((current_rms ** 2 * (layer_count - 1) + raw_token_prob ** 2) / layer_count) ** 0.5
             
             # Update context for next token (if not the last token)
             if i < len(candidate_tokens) - 1:
@@ -206,15 +232,106 @@ class EnhancedScoringService:
                 # Add space to separate tokens properly
                 current_context += current_token_text + " "
         
-        # Calculate creativity score (inverted probability)
-        creativity_score = 1.0 - full_probability
+        # Calculate final probability using RMS of raw probabilities
+        final_probability = current_rms
+        
+        # Calculate creativity score using layer-by-layer RMS
+        creativity_score = self._calculate_layer_rms_creativity_score(conditional_probabilities, final_probability)
         
         return MultiTokenProbability(
-            full_probability=full_probability,
+            full_probability=final_probability,
             token_probabilities=token_probabilities,
             conditional_probabilities=conditional_probabilities,
             creativity_score=creativity_score
         )
+    
+    def _calculate_rms_creativity_score(self, conditional_probabilities: List[float], full_probability: float) -> float:
+        """
+        Calculate creativity score using RMS normalization to reduce bimodal distribution.
+        
+        This addresses the vanishing gradient problem by:
+        1. Using RMS to smooth extreme probability values
+        2. Creating more gradual creativity gradients
+        3. Reducing sensitivity to outliers
+        
+        Args:
+            conditional_probabilities: List of conditional probabilities for each token
+            full_probability: Product of all conditional probabilities
+            
+        Returns:
+            Creativity score (0.0 = predictable, 1.0 = creative)
+        """
+        if not conditional_probabilities:
+            return 0.0
+        
+        # Calculate RMS of conditional probabilities
+        squared_sum = sum(prob ** 2 for prob in conditional_probabilities)
+        rms_probability = (squared_sum / len(conditional_probabilities)) ** 0.5
+        
+        # Calculate RMS-based creativity score
+        # Lower RMS = more predictable = lower creativity
+        # Higher RMS = more varied = higher creativity
+        rms_creativity = 1.0 - rms_probability
+        
+        # Blend with traditional approach for stability
+        traditional_creativity = 1.0 - full_probability
+        
+        # Weighted combination (favor RMS for better distribution)
+        creativity_score = 0.7 * rms_creativity + 0.3 * traditional_creativity
+        
+        # Apply sigmoid-like smoothing to reduce extreme values
+        creativity_score = self._smooth_creativity_score(creativity_score)
+        
+        return max(0.0, min(1.0, creativity_score))
+    
+    def _smooth_creativity_score(self, raw_score: float) -> float:
+        """
+        Apply smoothing function to reduce extreme creativity scores.
+        
+        Uses a modified sigmoid-like function to create more gradual transitions
+        between predictable and creative scores.
+        
+        Args:
+            raw_score: Raw creativity score (0.0 to 1.0)
+            
+        Returns:
+            Smoothed creativity score (0.0 to 1.0)
+        """
+        # Sigmoid-like smoothing with adjusted parameters
+        # This creates more gradual transitions and reduces extreme values
+        k = 3.0  # Steepness parameter
+        x0 = 0.5  # Midpoint
+        
+        # Apply smoothing function
+        smoothed = 1.0 / (1.0 + np.exp(-k * (raw_score - x0)))
+        
+        # Ensure we stay in valid range
+        return max(0.0, min(1.0, smoothed))
+    
+    def _calculate_layer_rms_creativity_score(self, conditional_probabilities: List[float], final_rms_probability: float) -> float:
+        """
+        Calculate creativity score using layer-by-layer RMS normalization.
+        
+        This method uses the RMS probability calculated progressively at each layer
+        instead of the traditional multiplicative chain, preventing vanishing gradient.
+        
+        Args:
+            conditional_probabilities: List of conditional probabilities for each token
+            final_rms_probability: RMS probability calculated layer-by-layer
+            
+        Returns:
+            Creativity score (0.0 = predictable, 1.0 = creative)
+        """
+        if not conditional_probabilities:
+            return 0.0
+        
+        # Use the final RMS probability directly (no blending with traditional)
+        creativity_score = 1.0 - final_rms_probability
+        
+        # Apply smoothing to reduce extreme values
+        creativity_score = self._smooth_creativity_score(creativity_score)
+        
+        return max(0.0, min(1.0, creativity_score))
     
     def demonstrate_progressive_context(self, prompt: str, candidate_word: str) -> Dict[str, Any]:
         """
@@ -515,7 +632,7 @@ class EnhancedScoringService:
             Dict with comprehensive scoring results
         """
         try:
-            print(f"🔍 DEBUG [enhanced_scoring_service.py:EnhancedScoringService:score_candidate_comprehensive:280] Received start_word = '{start_word}', candidate_word = '{candidate_word}'")
+            print(f"🔍 DEBUG [enhanced_scoring_service.py:EnhancedScoringService:280] Received start_word = '{start_word}', candidate_word = '{candidate_word}'")
             
             # Get all possible transformations for the start word (CACHE THIS)
             transformations = self.word_service.get_comprehensive_transformations(start_word)
@@ -534,8 +651,9 @@ class EnhancedScoringService:
                 'olx': transformations.changed_letters
             }
             
-            best_score = None
-            best_category = None
+            total_score = 0
+            valid_categories = []
+            category_scores = {}
             
             for category, word_list in categories_to_check.items():
                 if candidate_word in word_list:
@@ -544,36 +662,40 @@ class EnhancedScoringService:
                         start_word, candidate_word, category, transformations
                     )
                     category_results[category] = score_result
-                    
-                    # Track the best score
-                    if best_score is None or score_result.total_score > best_score.total_score:
-                        best_score = score_result
-                        best_category = category
+                    category_scores[category] = score_result.total_score
+                    valid_categories.append(category)
+                    total_score += score_result.total_score
             
-            if best_score is None:
+            if not valid_categories:
                 return {
                     "success": False,
                     "message": f"'{candidate_word}' is not a valid transformation of '{start_word}'",
                     "data": None
                 }
             
+            # Calculate average creativity score across all categories
+            avg_creativity = sum(result.creativity_score for result in category_results.values()) / len(category_results)
+            
             return {
                 "success": True,
-                "message": f"Calculated comprehensive score for '{candidate_word}'",
+                "message": f"Calculated comprehensive score for '{candidate_word}' across {len(valid_categories)} categories",
                 "data": {
                     "candidate_word": candidate_word,
                     "start_word": start_word,
-                    "best_category": best_category,
-                    "best_score": best_score.total_score,
-                    "creativity_score": best_score.creativity_score,
-                    "full_probability": best_score.full_probability,
-                    "base_score": best_score.base_score,
-                    "category_bonus": best_score.category_bonus,
-                    "token_analysis": best_score.token_analysis,
-                    "all_category_scores": {
-                        cat: result.total_score for cat, result in category_results.items()
+                    "valid_categories": valid_categories,
+                    "total_score": total_score,
+                    "category_count": len(valid_categories),
+                    "avg_creativity_score": avg_creativity,
+                    "category_scores": category_scores,
+                    "category_results": {
+                        cat: {
+                            "total_score": result.total_score,
+                            "base_score": result.base_score,
+                            "category_bonus": result.category_bonus,
+                            "creativity_score": result.creativity_score
+                        } for cat, result in category_results.items()
                     },
-                    "max_possible_score": 1500.0
+                    "max_possible_score": 1500.0 * len(valid_categories)  # Theoretical max if all categories perfect
                 }
             }
             
@@ -677,6 +799,26 @@ class EnhancedScoringService:
             logger.error(f"❌ Error calculating score with probability tree: {e}")
             return self._calculate_transformation_score_fallback(start_word, candidate_word, transformation_category, cached_transformations)
 
-def get_enhanced_scoring_service(model_name: str = "distilgpt2", device: str = "cpu", storage_type: str = "json", json_file_path: str = "probability_trees.json") -> EnhancedScoringService:
-    """Factory function to create EnhancedScoringService instance."""
-    return EnhancedScoringService(model_name, device, storage_type, json_file_path) 
+def get_enhanced_scoring_service(model_name: str = "distilgpt2", device: str = "cpu", storage_type: str = "json", json_file_path: str = None) -> EnhancedScoringService:
+    """
+    Factory function to create EnhancedScoringService instance.
+    
+    Args:
+        model_name: Name of the ML model to use
+        device: Device to run model on ('cpu' or 'cuda')
+        storage_type: Storage backend ('json' or 'redis')
+        json_file_path: Path to JSON storage file (defaults to main game_data location)
+        
+    Returns:
+        Configured EnhancedScoringService instance
+    """
+    # Set default path to main game_data location
+    if json_file_path is None:
+        json_file_path = str(Path(__file__).parent.parent / "game_data" / "probability_trees.json")
+    
+    return EnhancedScoringService(
+        model_name=model_name,
+        device=device,
+        storage_type=storage_type,
+        json_file_path=json_file_path
+    ) 

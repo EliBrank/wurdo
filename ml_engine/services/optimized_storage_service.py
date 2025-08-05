@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class StorageConfig:
     """Optimized storage configuration."""
     storage_type: str = "json"           # "json" or "redis"
-    json_file_path: str = "probability_trees.json"
+    json_file_path: str = "game_data/probability_trees.json"
     redis_url: Optional[str] = None
     compression: bool = True              # Use gzip compression for large objects
     cache_size: int = 1000               # In-memory cache size

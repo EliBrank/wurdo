@@ -56,8 +56,8 @@ async def time_inference_vs_lookup():
     
     print(f"⏱️  Inference time: {inference_time:.4f} seconds")
     if result1["success"]:
-        print(f"📊 Score: {result1['data']['best_score']:.2f}")
-        print(f"🎨 Creativity: {result1['data']['creativity_score']:.4f}")
+        print(f"📊 Score: {result1['data']['total_score']:.2f}")
+        print(f"🎨 Creativity: {result1['data']['avg_creativity_score']:.4f}")
     else:
         print(f"❌ Error: {result1['message']}")
     print()
@@ -72,8 +72,8 @@ async def time_inference_vs_lookup():
     
     print(f"⏱️  Lookup time: {lookup_time:.4f} seconds")
     if result2["success"]:
-        print(f"📊 Score: {result2['data']['best_score']:.2f}")
-        print(f"🎨 Creativity: {result2['data']['creativity_score']:.4f}")
+        print(f"📊 Score: {result2['data']['total_score']:.2f}")
+        print(f"🎨 Creativity: {result2['data']['avg_creativity_score']:.4f}")
     else:
         print(f"❌ Error: {result2['message']}")
     print()
