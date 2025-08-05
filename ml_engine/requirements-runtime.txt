@@ -1,0 +1,10 @@
+# Minimal Runtime Requirements for ML Engine
+# Only essential dependencies needed for gameplay with pre-generated data
+
+# Core ML Engine (REQUIRED)
+onnxruntime>=1.15.0
+tiktoken>=0.5.0
+numpy>=1.24.0
+
+# Word Processing (REQUIRED for rhymes)
+pronouncing>=0.2.0 

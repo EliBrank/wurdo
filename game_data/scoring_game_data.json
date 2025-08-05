@@ -1,0 +1,93 @@
+{
+  "session_words": [
+    "doge",
+    "doeg",
+    "gode",
+    "mode",
+    "crowed",
+    "bestowed",
+    "crowed"
+  ],
+  "session_scores": [
+    {
+      "word": "doge",
+      "categories": [
+        "ola"
+      ],
+      "category_scores": {
+        "ola": 511.28031679689366
+      },
+      "total_score": 511.28031679689366,
+      "avg_creativity_score": 0.020697828985125958
+    },
+    {
+      "word": "doeg",
+      "categories": [
+        "ana"
+      ],
+      "category_scores": {
+        "ana": 595.8017913922748
+      },
+      "total_score": 595.8017913922748,
+      "avg_creativity_score": 0.15328286622763965
+    },
+    {
+      "word": "gode",
+      "categories": [
+        "ana"
+      ],
+      "category_scores": {
+        "ana": 2753.2722563205107
+      },
+      "total_score": 2753.2722563205107,
+      "avg_creativity_score": 4.006544512641022
+    },
+    {
+      "word": "mode",
+      "categories": [
+        "olx"
+      ],
+      "category_scores": {
+        "olx": 513.6342426912003
+      },
+      "total_score": 513.6342426912003,
+      "avg_creativity_score": 0.02350731498482813
+    },
+    {
+      "word": "crowed",
+      "categories": [
+        "prf"
+      ],
+      "category_scores": {
+        "prf": 500.05787081689624
+      },
+      "total_score": 500.05787081689624,
+      "avg_creativity_score": 0.0001112900324927621
+    },
+    {
+      "word": "bestowed",
+      "categories": [
+        "prf"
+      ],
+      "category_scores": {
+        "prf": 500.2023232903045
+      },
+      "total_score": 500.2023232903045,
+      "avg_creativity_score": 0.00038908325058559923
+    },
+    {
+      "word": "crowed",
+      "categories": [
+        "prf"
+      ],
+      "category_scores": {
+        "prf": 500.07259582990207
+      },
+      "total_score": 500.07259582990207,
+      "avg_creativity_score": 0.00013960736519635268
+    }
+  ],
+  "total_session_score": 5874.321397137982,
+  "current_word": "crowed",
+  "last_updated": "2025-08-05T16:36:23.080975"
+}
