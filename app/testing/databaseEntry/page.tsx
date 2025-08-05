@@ -4,8 +4,19 @@ import { useState } from "react";
 import { getWordData, updateWordData, createWordEntry } from "@/lib/actions";
 import { FullWordData, PartialUpdateData } from "@/lib/definitions";
 import { RhymeMicro } from "@/lib/microservices";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/firebaseConfig";
+import { useRouter } from "next/navigation";
 
-export default function WordEditor() {
+const WordEditor = () => {
+  const router = useRouter();
+  const [user] = useAuthState(auth);
+  console.log(user?.email);
+
+  if (!user) {
+    router.push("/testing/sign-in");
+  }
+
   // State for the search input field
   const [word, setWord] = useState<string>("");
 
@@ -303,4 +314,6 @@ export default function WordEditor() {
       )}
     </div>
   );
-}
+};
+
+export default WordEditor;
