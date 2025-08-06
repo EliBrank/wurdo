@@ -14,6 +14,7 @@ export const KeyboardKey = ({
       onClick={onClick}
       className={`
         ${isBackspace ? 'col-span-2' : ''}
+        rounded-2xl bg-tertiary
       `}
     >
       {label}
