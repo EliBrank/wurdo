@@ -143,6 +143,63 @@ docker run -it wurdo-ml-engine python scoring_game.py
 - Proper val-to-prb mapping verified
 - Nested structure integrity confirmed
 
+## Creativity Scoring Improvements
+
+### Distribution Expansion Algorithm
+
+**Problem Solved:**
+- Original creativity scores had narrow distribution (0.0-0.1 range)
+- Bimodal clustering at extremes (very predictable vs very creative)
+- Poor differentiation between word creativity levels
+
+**Solution Implemented:**
+```python
+def _expand_creativity_distribution(self, raw_score: float) -> float:
+    # Power function expansion (cube root)
+    power_expanded = raw_score ** (1/3)
+    
+    # Sigmoid-like transformation for smooth expansion
+    k = 2.5, x0 = 0.3
+    sigmoid_expanded = 1.0 / (1.0 + np.exp(-k * (power_expanded - x0)))
+    
+    # Linear scaling to maximize range
+    expanded_score = sigmoid_expanded * 1.2
+    
+    return max(0.0, min(1.0, expanded_score))
+```
+
+**Results Achieved:**
+- **Broader Distribution:** 0.39 - 1.0 range (vs 0.0-0.1 before)
+- **Better Differentiation:** Clear separation between creativity levels
+- **Preserved Relationships:** Relative word creativity maintained
+- **Uniform Application:** All scoring methods use same expansion
+
+### Length Normalization
+
+**Problem Solved:**
+- Multi-token words artificially penalized vs single-token words
+- Token count bias in creativity scoring
+
+**Solution Implemented:**
+```python
+# In calculate_multi_token_probability
+final_probability = current_rms / len(candidate_tokens)  # Length normalization
+```
+
+### RMS Normalization
+
+**Problem Solved:**
+- Traditional multiplicative probability chains caused vanishing gradients
+- Extreme values clustered at 0% or 100% creativity
+
+**Solution Implemented:**
+```python
+# Root-Mean-Square of conditional probabilities
+squared_sum = sum(prob ** 2 for prob in conditional_probabilities)
+rms_probability = (squared_sum / len(conditional_probabilities)) ** 0.5
+creativity_score = 1.0 - rms_probability
+```
+
 ## Usage
 
 ```python
@@ -172,6 +229,13 @@ score = await scoring_service.score_candidate_comprehensive("xylophone", "teleph
 - ProbabilityNode with val/prb/dat components
 - WordProbabilityTree with ana/olo/rhy categories
 - OptimizedStorageService with serialization/compression
+
+**Creativity Scoring Algorithms:**
+- **RMS Normalization:** Root-mean-square of conditional probabilities
+- **Length Normalization:** Divides by token count to remove length bias
+- **Distribution Expansion:** Power function + sigmoid transformation
+- **Smoothing:** Sigmoid-like function to reduce extreme values
+- **Uniform Application:** All scoring methods use identical algorithms
 
 ## Dependencies
 

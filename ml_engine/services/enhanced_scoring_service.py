@@ -232,11 +232,11 @@ class EnhancedScoringService:
                 # Add space to separate tokens properly
                 current_context += current_token_text + " "
         
-        # Calculate final probability using RMS of raw probabilities
-        final_probability = current_rms
+        # Calculate final probability using length-normalized RMS
+        final_probability = current_rms / len(candidate_tokens)  # ← LENGTH NORMALIZATION
         
-        # Calculate creativity score using layer-by-layer RMS
-        creativity_score = self._calculate_layer_rms_creativity_score(conditional_probabilities, final_probability)
+        # Calculate creativity score using UNNORMALIZED RMS (to avoid double penalty)
+        creativity_score = self._calculate_layer_rms_creativity_score(conditional_probabilities, current_rms)
         
         return MultiTokenProbability(
             full_probability=final_probability,
@@ -308,6 +308,43 @@ class EnhancedScoringService:
         # Ensure we stay in valid range
         return max(0.0, min(1.0, smoothed))
     
+    def _expand_creativity_distribution(self, raw_score: float) -> float:
+        """
+        Expand the creativity score distribution to create more dramatic differences
+        while preserving relative relationships between words.
+        
+        Uses a combination of techniques:
+        1. Power function to expand the range
+        2. Sigmoid-like transformation for smooth transitions
+        3. Clipping to ensure valid range
+        
+        Args:
+            raw_score: Raw creativity score (0.0 to 1.0)
+            
+        Returns:
+            Expanded creativity score (0.0 to 1.0) with broader distribution
+        """
+        if raw_score <= 0.0:
+            return 0.0
+        if raw_score >= 1.0:
+            return 1.0
+        
+        # Technique 1: Power function expansion
+        # Use cube root to expand low values and compress high values
+        power_expanded = raw_score ** (1/3)
+        
+        # Technique 2: Sigmoid-like transformation for smooth expansion
+        k = 2.5  # Steepness parameter
+        x0 = 0.3  # Midpoint (shifted to favor expansion of lower values)
+        sigmoid_expanded = 1.0 / (1.0 + np.exp(-k * (power_expanded - x0)))
+        
+        # Technique 3: Linear scaling to maximize the range
+        # Map the sigmoid output to a broader range
+        expanded_score = sigmoid_expanded * 1.2  # Allow slight overflow for dramatic effect
+        
+        # Ensure we stay in valid range
+        return max(0.0, min(1.0, expanded_score))
+    
     def _calculate_layer_rms_creativity_score(self, conditional_probabilities: List[float], final_rms_probability: float) -> float:
         """
         Calculate creativity score using layer-by-layer RMS normalization.
@@ -330,6 +367,9 @@ class EnhancedScoringService:
         
         # Apply smoothing to reduce extreme values
         creativity_score = self._smooth_creativity_score(creativity_score)
+        
+        # Apply distribution expansion to create broader range while preserving relationships
+        creativity_score = self._expand_creativity_distribution(creativity_score)
         
         return max(0.0, min(1.0, creativity_score))
     
@@ -439,6 +479,9 @@ class EnhancedScoringService:
             creativity_score = ProbabilityTreeLookup.get_creativity_score(
                 tree, main_category, subcategory, candidate_tokens
             )
+            
+            # Apply distribution expansion to create broader range while preserving relationships
+            creativity_score = self._expand_creativity_distribution(creativity_score)
             
             # Calculate base score (500-1000 points)
             base_score = 500 + (500 * creativity_score)
@@ -762,6 +805,9 @@ class EnhancedScoringService:
             creativity_score = ProbabilityTreeLookup.get_creativity_score(
                 tree, main_category, subcategory, candidate_tokens
             )
+            
+            # Apply distribution expansion to create broader range while preserving relationships
+            creativity_score = self._expand_creativity_distribution(creativity_score)
             
             # Calculate base score (500-1000 points)
             base_score = 500 + (500 * creativity_score)
