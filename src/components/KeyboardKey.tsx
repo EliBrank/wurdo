@@ -13,8 +13,10 @@ export const KeyboardKey = ({
     <button
       onClick={onClick}
       className={`
-        ${isBackspace ? 'col-span-2' : ''}
-        rounded-2xl bg-tertiary
+        ${isBackspace ? 'col-span-2' : 'col-span-1'}
+        h-12 touch-manipulation rounded-md
+        bg-secondary text-lg font-semibold
+        select-none
       `}
     >
       {label}

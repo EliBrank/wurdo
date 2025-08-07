@@ -14,9 +14,11 @@ export const GameArea = () => {
     }
   }
   const handleBackspace = () => {
+    // Removes one letter from word input
     setWordInput(prev => prev.slice(0, -1));
   }
   const handleSubmit = () => {
+    // Check if word is between 3 and 7 letters
     if (wordInput.length > minWordLength && wordInput.length < maxWordLength) {
       // TODO: connect to word scoring service
     }
@@ -25,8 +27,8 @@ export const GameArea = () => {
   return (
     <div>
       <Keyboard
-        onKeyPress={}
-        onBackspace={}
+        onKeyPress={handleKeyPress}
+        onBackspace={handleBackspace}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 import { KeyboardRow } from "./KeyboardRow";
 
 type KeyboardProps = {
-  onKeyPress: () => void;
+  onKeyPress: (key: string) => void;
   onBackspace: () => void;
 }
 

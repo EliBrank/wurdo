@@ -1,6 +1,6 @@
-"use client";
 import React from "react";
 import Navbar from "@/src/components/Navbar";
+import { GameArea } from "@/src/components/GameArea";
 // import Link from "next/link";
 
 export default function PlayPage() {
@@ -17,6 +17,7 @@ export default function PlayPage() {
         </div>
         {/* Page Content */}
         <section>
+          <GameArea />
         </section>
       </main>
     </div>

@@ -21,6 +21,12 @@
   --color-tertiary: var(--purple-main);
 }
 
+@layer components {
+  .letter-tile {
+
+  }
+}
+
 body {
   background: var(--purple-main);
 }
