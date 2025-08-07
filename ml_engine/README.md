@@ -230,13 +230,6 @@ score = await scoring_service.score_candidate_comprehensive("xylophone", "teleph
 - WordProbabilityTree with ana/olo/rhy categories
 - OptimizedStorageService with serialization/compression
 
-**Creativity Scoring Algorithms:**
-- **RMS Normalization:** Root-mean-square of conditional probabilities
-- **Length Normalization:** Divides by token count to remove length bias
-- **Distribution Expansion:** Power function + sigmoid transformation
-- **Smoothing:** Sigmoid-like function to reduce extreme values
-- **Uniform Application:** All scoring methods use identical algorithms
-
 ## Dependencies
 
 See `requirements.txt` for Python package dependencies.
