@@ -18,7 +18,10 @@ export async function getWordData(word: string): Promise<FullWordData | null> {
   try {
     const result = await redis.json.get(`word:${word.toLowerCase()}`, "$");
     return (result as FullWordData) || null;
+    const result = await redis.json.get(`word:${word.toLowerCase()}`, "$");
+    return (result as FullWordData) || null;
   } catch (err) {
+    console.error(`Failed to get word data for "${word}":`, err);
     console.error(`Failed to get word data for "${word}":`, err);
     return null;
   }
@@ -147,6 +150,7 @@ export async function updateWordData(
     console.log(`Successfully updated word "${word}" in Redis.`);
     return true;
   } catch (err) {
+    console.error(`Failed to update word "${word}" in Redis:`, err);
     console.error(`Failed to update word "${word}" in Redis:`, err);
     return false;
   }
