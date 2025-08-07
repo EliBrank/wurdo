@@ -196,34 +196,14 @@ class EfficientWordEngine:
             "fight": ["light", "like", "might", "sight", "bright", "night", "right", "tight"],
             "night": ["light", "like", "might", "sight", "bright", "fight", "right", "tight"],
             "right": ["light", "like", "might", "sight", "bright", "fight", "night", "tight"],
-            "tight": ["light", "like", "might", "sight", "bright", "fight", "night", "right"],
-            "cat": ["cut", "cot", "kit", "hat", "bat", "rat", "sat", "fat", "mat", "pat"],
-            "cut": ["cat", "cot", "kit", "hat", "bat", "rat", "sat", "fat", "mat", "pat"],
-            "cot": ["cat", "cut", "kit", "hat", "bat", "rat", "sat", "fat", "mat", "pat"],
-            "kit": ["cat", "cut", "cot", "hat", "bat", "rat", "sat", "fat", "mat", "pat"],
-            "hat": ["cat", "cut", "cot", "kit", "bat", "rat", "sat", "fat", "mat", "pat"],
-            "bat": ["cat", "cut", "cot", "kit", "hat", "rat", "sat", "fat", "mat", "pat"],
-            "rat": ["cat", "cut", "cot", "kit", "hat", "bat", "sat", "fat", "mat", "pat"],
-            "sat": ["cat", "cut", "cot", "kit", "hat", "bat", "rat", "fat", "mat", "pat"],
-            "fat": ["cat", "cut", "cot", "kit", "hat", "bat", "rat", "sat", "mat", "pat"],
-            "mat": ["cat", "cut", "cot", "kit", "hat", "bat", "rat", "sat", "fat", "pat"],
-            "pat": ["cat", "cut", "cot", "kit", "hat", "bat", "rat", "sat", "fat", "mat"],
-            "there": ["where", "care", "share", "dare", "rare", "fair", "pair", "stair", "chair", "hair"],
-            "where": ["there", "care", "share", "dare", "rare", "fair", "pair", "stair", "chair", "hair"],
-            "care": ["there", "where", "share", "dare", "rare", "fair", "pair", "stair", "chair", "hair"],
-            "share": ["there", "where", "care", "dare", "rare", "fair", "pair", "stair", "chair", "hair"],
-            "dare": ["there", "where", "care", "share", "rare", "fair", "pair", "stair", "chair", "hair"],
-            "rare": ["there", "where", "care", "share", "dare", "fair", "pair", "stair", "chair", "hair"],
-            "fair": ["there", "where", "care", "share", "dare", "rare", "pair", "stair", "chair", "hair"],
-            "pair": ["there", "where", "care", "share", "dare", "rare", "fair", "stair", "chair", "hair"],
-            "stair": ["there", "where", "care", "share", "dare", "rare", "fair", "pair", "chair", "hair"],
-            "chair": ["there", "where", "care", "share", "dare", "rare", "fair", "pair", "stair", "hair"],
-            "hair": ["there", "where", "care", "share", "dare", "rare", "fair", "pair", "stair", "chair"]
         }
         
-        # Load package files and build Trie
+        # Load package files
         self._load_package_files()
-        self._build_transformation_trie()
+        
+        # Build transformation trie if words were loaded
+        if self.quality_words:
+            self._build_transformation_trie()
         
         logger.info("Initialized Enhanced Ultimate CMU Dictionary rhyme client")
     
@@ -307,7 +287,7 @@ class EfficientWordEngine:
     
     # Essential pronouncing methods with enhanced caching
     def get_rhymes(self, word: str) -> List[str]:
-        """Get all rhymes for a word using CMU Dictionary with caching."""
+        """Get all rhymes for a word using comprehensive pronunciation matching."""
         word_lower = word.lower()
         
         # Check cache first
@@ -315,14 +295,45 @@ class EfficientWordEngine:
             return self._rhyme_cache[word_lower]
         
         try:
-            rhymes = self.pronouncing.rhymes(word)
+            # Use our own comprehensive rhyme finder instead of pronouncing library
+            rhymes = self._find_comprehensive_rhymes(word)
             # Cache the result
             self._rhyme_cache[word_lower] = rhymes
-            logger.info(f"Found {len(rhymes)} rhymes for '{word}' using CMU Dictionary")
+            logger.info(f"Found {len(rhymes)} rhymes for '{word}' using comprehensive pronunciation matching")
             return rhymes
         except Exception as e:
             logger.error(f"Error getting rhymes for '{word}': {e}")
             return []
+    
+    def _find_comprehensive_rhymes(self, word: str) -> List[str]:
+        """Find rhymes using all pronunciations consistently."""
+        word_phones = self.get_pronunciation(word)
+        if not word_phones:
+            return []
+        
+        # Get all rhyming parts for this word
+        word_rhyming_parts = [self.pronouncing.rhyming_part(phone) for phone in word_phones]
+        
+        # Find all words that share any rhyming part
+        rhymes = set()
+        
+        # Search through all words in our quality words set
+        for candidate_word in self.quality_words:
+            if candidate_word == word:
+                continue
+                
+            candidate_phones = self.get_pronunciation(candidate_word)
+            if not candidate_phones:
+                continue
+            
+            # Check if any rhyming parts match
+            candidate_rhyming_parts = [self.pronouncing.rhyming_part(phone) for phone in candidate_phones]
+            
+            # If any rhyming parts match, it's a rhyme
+            if any(wp in candidate_rhyming_parts for wp in word_rhyming_parts):
+                rhymes.add(candidate_word)
+        
+        return list(rhymes)
     
     def get_pronunciation(self, word: str) -> List[str]:
         """Get pronunciation for a word with caching."""
@@ -377,10 +388,24 @@ class EfficientWordEngine:
             phones = self.get_pronunciation(word)
             if not phones:
                 return ""
+            # Return the rhyming part of the first pronunciation (for backward compatibility)
+            # Note: For comprehensive rhyme detection, use categorize_rhymes_by_quality()
             return self.pronouncing.rhyming_part(phones[0])
         except Exception as e:
             logger.error(f"Error getting rhyming part for '{word}': {e}")
             return ""
+    
+    def get_all_rhyming_parts(self, word: str) -> List[str]:
+        """Get all rhyming parts for a word (all pronunciations)."""
+        try:
+            phones = self.get_pronunciation(word)
+            if not phones:
+                return []
+            # Return rhyming parts for all pronunciations
+            return [self.pronouncing.rhyming_part(phone) for phone in phones]
+        except Exception as e:
+            logger.error(f"Error getting all rhyming parts for '{word}': {e}")
+            return []
     
     def search_by_pronunciation(self, pattern: str) -> List[str]:
         """Search for words whose pronunciation matches a regex pattern."""
@@ -400,7 +425,7 @@ class EfficientWordEngine:
     
     # Enhanced rhyme categorization with rich and slant rhymes
     def categorize_rhymes_by_quality(self, word: str, rhymes: List[str]) -> Dict[str, List[str]]:
-        """Categorize rhymes by quality using CMU Dictionary features."""
+        """Categorize rhymes by quality using CMU Dictionary features with all pronunciations."""
         perfect_rhymes = []
         near_rhymes = []
         rich_rhymes = []
@@ -410,27 +435,30 @@ class EfficientWordEngine:
         if not word_phones:
             return {"perfect": [], "near": [], "rich": [], "slant": []}
         
-        word_pronunciation = word_phones[0]  # Use first pronunciation
-        
-        for rhyme in rhymes:
-            rhyme_phones = self.get_pronunciation(rhyme)
-            if not rhyme_phones:
-                continue
-            
-            rhyme_pronunciation = rhyme_phones[0]
-            
-            # Check if it's a perfect rhyme (same ending)
-            if self._is_perfect_rhyme(word_pronunciation, rhyme_pronunciation):
-                perfect_rhymes.append(rhyme)
-            # Check if it's a rich rhyme (homophone)
-            elif self._is_rich_rhyme(word, rhyme):
-                rich_rhymes.append(rhyme)
-            # Check if it's a slant rhyme (advanced patterns)
-            elif self._is_slant_rhyme(word, rhyme):
-                slant_rhymes.append(rhyme)
-            # Check if it's a near rhyme (basic consonant patterns)
-            elif self._is_near_rhyme(word_pronunciation, rhyme_pronunciation):
-                near_rhymes.append(rhyme)
+        # Check all pronunciation combinations
+        for word_pronunciation in word_phones:
+            for rhyme in rhymes:
+                rhyme_phones = self.get_pronunciation(rhyme)
+                if not rhyme_phones:
+                    continue
+                
+                for rhyme_pronunciation in rhyme_phones:
+                    # Check if it's a perfect rhyme (same ending)
+                    if self._is_perfect_rhyme(word_pronunciation, rhyme_pronunciation):
+                        if rhyme not in perfect_rhymes:
+                            perfect_rhymes.append(rhyme)
+                    # Check if it's a rich rhyme (homophone)
+                    elif self._is_rich_rhyme(word, rhyme):
+                        if rhyme not in rich_rhymes:
+                            rich_rhymes.append(rhyme)
+                    # Check if it's a slant rhyme (advanced patterns)
+                    elif self._is_slant_rhyme(word, rhyme):
+                        if rhyme not in slant_rhymes:
+                            slant_rhymes.append(rhyme)
+                    # Check if it's a near rhyme (basic consonant patterns)
+                    elif self._is_near_rhyme(word_pronunciation, rhyme_pronunciation):
+                        if rhyme not in near_rhymes:
+                            near_rhymes.append(rhyme)
         
         return {
             "perfect": perfect_rhymes,
@@ -468,14 +496,20 @@ class EfficientWordEngine:
             self._homophone_cache[cache_key] = is_homophone
             return is_homophone
         
-        # Check if they have identical pronunciations
+        # Check if they have identical pronunciations (check all combinations)
         word1_phones = self.get_pronunciation(word1)
         word2_phones = self.get_pronunciation(word2)
         
         if word1_phones and word2_phones:
-            is_homophone = word1_phones[0] == word2_phones[0]
-            self._homophone_cache[cache_key] = is_homophone
-            return is_homophone
+            # Check all pronunciation combinations
+            for word1_pronunciation in word1_phones:
+                for word2_pronunciation in word2_phones:
+                    if word1_pronunciation == word2_pronunciation:
+                        self._homophone_cache[cache_key] = True
+                        return True
+            
+            self._homophone_cache[cache_key] = False
+            return False
         
         self._homophone_cache[cache_key] = False
         return False

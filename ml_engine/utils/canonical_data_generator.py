@@ -90,7 +90,7 @@ class CanonicalDataGenerator:
                 
                 # Apply relaxed quality filters
                 if (3 <= len(word) <= 8 and                    # Expanded length range
-                    word.isalpha() and                         # Alphabetic only
+                    self._is_valid_word_format(word) and       # Check word format (allows hyphens, apostrophes)
                     not self._has_excessive_repeats(word)):    # No excessive repeats
                     
                     self.quality_words.add(word)
@@ -101,6 +101,12 @@ class CanonicalDataGenerator:
         """Filter out very obscure words."""
         freq = wordfreq.word_frequency(word, 'en')
         return freq < 1e-7
+    
+    def _is_valid_word_format(self, word: str) -> bool:
+        """Check if word has valid format (allows hyphens and apostrophes)."""
+        # Remove hyphens and apostrophes for alphabetic check
+        clean_word = word.replace('-', '').replace("'", '')
+        return clean_word.isalpha()
     
     def _has_excessive_repeats(self, word: str) -> bool:
         """Check for excessive repeated letters."""
