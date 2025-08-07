@@ -143,7 +143,53 @@ docker run -it wurdo-ml-engine python scoring_game.py
 - Proper val-to-prb mapping verified
 - Nested structure integrity confirmed
 
-## Creativity Scoring Improvements
+## Scoring System
+
+### Base Scoring by Category and Length
+
+The scoring system factors in both transformation category and word length to reward more complex and creative transformations.
+
+#### Base Scores by Category and Length
+
+| Category | 3-char | 4-char | 5-char | 6-char | 7-char |
+|----------|--------|--------|--------|--------|--------|
+| **OLA** (One-Letter-Added) | 100 | 200 | 300 | 400 | 500 |
+| **OLR** (One-Letter-Removed) | 100 | 200 | 300 | 400 | 500 |
+| **OLX** (One-Letter-Changed) | 100 | 200 | 300 | 400 | 500 |
+| **PRF** (Perfect Rhymes) | 50 | 100 | 150 | 200 | 250 |
+| **RCH** (Rich Rhymes/Homophones) | 150 | 300 | 450 | 600 | 750 |
+| **ANA** (Anagrams) | 100 | 300 | 500 | 700 | 900 |
+
+#### Length Multipliers
+
+- **OLO, PRF, and RCH transformations**: 1x at 3 chars, 2x at 4 chars, 3x at 5 chars, 4x at 6 chars, 5x at 7 chars
+- **ANA transformations**: 1x for 3 chars, 3x for 4 chars, 5x for 5 chars, 7x for 6 chars, 9x for 7 chars
+
+#### Bonus Scoring
+
+For all categories, creativity scoring adds a bonus calculated as:
+```
+bonus = base_score × 0.5 × creativity_score
+```
+
+#### Total Score Formula
+
+```
+total_score = base_score + bonus
+```
+
+#### Example Scores (creativity = 1.0)
+
+| Category | Length | Base Score | Bonus | Total Score |
+|----------|--------|------------|-------|-------------|
+| **PRF** | 3 | 50 | 25 | 75 |
+| **PRF** | 7 | 250 | 125 | 375 |
+| **RCH** | 3 | 150 | 75 | 225 |
+| **RCH** | 7 | 750 | 375 | 1125 |
+| **ANA** | 3 | 100 | 50 | 150 |
+| **ANA** | 7 | 900 | 450 | 1350 |
+
+### Creativity Scoring Improvements
 
 ### Distribution Expansion Algorithm
 

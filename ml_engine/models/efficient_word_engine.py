@@ -186,18 +186,6 @@ class EfficientWordEngine:
             "would": ["wood"]
         }
         
-        # Advanced slant rhyme patterns
-        self.SLANT_PATTERNS = {
-            "light": ["like", "might", "sight", "bright", "fight", "night", "right", "tight"],
-            "like": ["light", "might", "sight", "bright", "fight", "night", "right", "tight"],
-            "might": ["light", "like", "sight", "bright", "fight", "night", "right", "tight"],
-            "sight": ["light", "like", "might", "bright", "fight", "night", "right", "tight"],
-            "bright": ["light", "like", "might", "sight", "fight", "night", "right", "tight"],
-            "fight": ["light", "like", "might", "sight", "bright", "night", "right", "tight"],
-            "night": ["light", "like", "might", "sight", "bright", "fight", "right", "tight"],
-            "right": ["light", "like", "might", "sight", "bright", "fight", "night", "tight"],
-        }
-        
         # Load package files
         self._load_package_files()
         
@@ -515,20 +503,124 @@ class EfficientWordEngine:
         return False
     
     def _is_slant_rhyme(self, word1: str, word2: str) -> bool:
-        """Check if two words are slant rhymes using advanced patterns."""
+        """Check if two words are slant rhymes using algorithmic detection."""
         word1_lower = word1.lower()
         word2_lower = word2.lower()
         
-        # Check slant rhyme patterns
-        if word1_lower in self.SLANT_PATTERNS:
-            if word2_lower in self.SLANT_PATTERNS[word1_lower]:
-                return True
+        # Skip if words are identical
+        if word1_lower == word2_lower:
+            return False
         
-        if word2_lower in self.SLANT_PATTERNS:
-            if word1_lower in self.SLANT_PATTERNS[word2_lower]:
-                return True
+        # Get pronunciations for both words
+        word1_phones = self.get_pronunciation(word1)
+        word2_phones = self.get_pronunciation(word2)
+        
+        if not word1_phones or not word2_phones:
+            return False
+        
+        # Check all pronunciation combinations for slant rhyme patterns
+        for word1_pronunciation in word1_phones:
+            for word2_pronunciation in word2_phones:
+                if self._is_slant_rhyme_pronunciation(word1_pronunciation, word2_pronunciation):
+                    return True
         
         return False
+    
+    def _is_slant_rhyme_pronunciation(self, phones1: str, phones2: str) -> bool:
+        """Check if two pronunciations form a slant rhyme using linguistic rules."""
+        # Extract rhyming parts
+        rhyme1 = self._extract_rhyming_part(phones1)
+        rhyme2 = self._extract_rhyming_part(phones2)
+        
+        if rhyme1 == "" or rhyme2 == "":
+            return False
+        
+        # Don't count as slant if they're perfect rhymes
+        if rhyme1 == rhyme2:
+            return False
+        
+        # Check for assonance (same vowel sounds, different consonants)
+        if self._has_assonance(rhyme1, rhyme2):
+            return True
+        
+        # Check for consonance (same consonant patterns, different vowels)
+        if self._has_consonance(rhyme1, rhyme2):
+            return True
+        
+        # Check for half-rhymes (partial similarity)
+        if self._has_half_rhyme(rhyme1, rhyme2):
+            return True
+        
+        return False
+    
+    def _has_assonance(self, rhyme1: str, rhyme2: str) -> bool:
+        """Check if two rhyming parts have assonance (same vowel sounds)."""
+        # Extract vowels with stress
+        vowels1 = self._extract_vowels_with_stress(rhyme1)
+        vowels2 = self._extract_vowels_with_stress(rhyme2)
+        
+        if not vowels1 or not vowels2:
+            return False
+        
+        # Check if they have the same vowel sounds
+        return vowels1 == vowels2
+    
+    def _has_consonance(self, rhyme1: str, rhyme2: str) -> bool:
+        """Check if two rhyming parts have consonance (same consonant patterns)."""
+        # Extract consonants only
+        consonants1 = self._extract_consonants(rhyme1)
+        consonants2 = self._extract_consonants(rhyme2)
+        
+        if not consonants1 or not consonants2:
+            return False
+        
+        # Check if they end with similar consonant patterns
+        # Allow for some variation in consonant patterns
+        return self._similar_consonant_pattern(consonants1, consonants2)
+    
+    def _has_half_rhyme(self, rhyme1: str, rhyme2: str) -> bool:
+        """Check if two rhyming parts have half-rhyme (partial similarity)."""
+        # Split into phonemes
+        phonemes1 = rhyme1.split()
+        phonemes2 = rhyme2.split()
+        
+        if len(phonemes1) < 2 or len(phonemes2) < 2:
+            return False
+        
+        # Check if they share at least 2 phonemes in the same positions
+        shared_phonemes = 0
+        min_length = min(len(phonemes1), len(phonemes2))
+        
+        for i in range(min_length):
+            if phonemes1[i] == phonemes2[i]:
+                shared_phonemes += 1
+        
+        # Require at least 2 shared phonemes and at least 50% similarity
+        return shared_phonemes >= 2 and (shared_phonemes / min_length) >= 0.5
+    
+    def _extract_vowels_with_stress(self, phones: str) -> str:
+        """Extract vowels with stress markers from pronunciation."""
+        vowels = []
+        phonemes = phones.split()
+        
+        for phoneme in phonemes:
+            # Check for vowels with stress markers (1, 2, 0)
+            if any(vowel in phoneme for vowel in ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH', 'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']):
+                vowels.append(phoneme)
+        
+        return ' '.join(vowels)
+    
+    def _extract_consonants(self, phones: str) -> str:
+        """Extract consonants from pronunciation."""
+        consonants = []
+        phonemes = phones.split()
+        
+        for phoneme in phonemes:
+            # Check for consonants (not vowels)
+            if not any(vowel in phoneme for vowel in ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH', 'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']):
+                consonants.append(phoneme)
+        
+        return ' '.join(consonants)
     
     def _is_near_rhyme(self, phones1: str, phones2: str) -> bool:
         """Check if two pronunciations form a near rhyme."""

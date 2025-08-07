@@ -99,6 +99,10 @@ class EnhancedScoringService:
             vocab_size=50257  # distilGPT-2 vocab size
         )
         
+        # Initialize scoring caches for efficiency
+        self._base_score_cache = {}  # Cache for base scores
+        self._bonus_cache = {}       # Cache for category bonuses
+        
         # Initialize the production ONNX model
         model_path = str(Path(__file__).parent.parent / "distilgpt2_onnx" / "model.onnx")
         if not self.scorer.initialize(model_path):
@@ -440,12 +444,12 @@ class EnhancedScoringService:
                 tree, main_category, subcategory, candidate_tokens
             )
             
-            # Calculate base score (500-1000 points)
-            base_score = 500 + (500 * creativity_score)
+            # Calculate base score based on category and word length
+            base_score = self._get_base_score(transformation_category, len(candidate_word))
             
-            # Calculate category bonus based on transformation type
+            # Calculate category bonus based on transformation type and word length
             category_bonus = self._calculate_category_bonus(
-                transformation_category, creativity_score
+                transformation_category, creativity_score, len(candidate_word)
             )
             
             # Calculate total score
@@ -513,12 +517,12 @@ class EnhancedScoringService:
         # Calculate multi-token probability with valid tokens scaling
         prob_result = self.calculate_multi_token_probability(prompt, candidate_word, list(valid_tokens))
         
-        # Calculate base score (500-1000 points)
-        base_score = 500 + (500 * prob_result.creativity_score)
+        # Calculate base score based on category and word length
+        base_score = self._get_base_score(transformation_category, len(candidate_word))
         
-        # Calculate category bonus based on transformation type
+        # Calculate category bonus based on transformation type and word length
         category_bonus = self._calculate_category_bonus(
-            transformation_category, prob_result.creativity_score
+            transformation_category, prob_result.creativity_score, len(candidate_word)
         )
         
         # Calculate total score
@@ -586,39 +590,88 @@ class EnhancedScoringService:
         
         return prompt
     
-    def _calculate_category_bonus(self, category: str, creativity_score: float) -> float:
+    def _get_base_score(self, category: str, word_length: int) -> float:
         """
-        Calculate category-specific bonus based on transformation type.
+        Get base score based on category and word length with caching for efficiency.
+        
+        Args:
+            category: Transformation category
+            word_length: Length of the word (3-7 characters)
+            
+        Returns:
+            Base score for the category and length
+        """
+        # Create cache key
+        cache_key = f"{category}_{word_length}"
+        
+        # Check cache first
+        if cache_key in self._base_score_cache:
+            return self._base_score_cache[cache_key]
+        
+        # Base scores by category and length (3-7 characters)
+        base_scores = {
+            'ola': {3: 100, 4: 200, 5: 300, 6: 400, 7: 500},  # One-letter-added
+            'olr': {3: 100, 4: 200, 5: 300, 6: 400, 7: 500},  # One-letter-removed
+            'olx': {3: 100, 4: 200, 5: 300, 6: 400, 7: 500},  # One-letter-changed
+            'prf': {3: 50, 4: 100, 5: 150, 6: 200, 7: 250},   # Perfect rhymes
+            'rch': {3: 150, 4: 300, 5: 450, 6: 600, 7: 750},  # Rich rhymes/homophones
+            'ana': {3: 100, 4: 300, 5: 500, 6: 700, 7: 900},  # Anagrams
+            'sln': {3: 75, 4: 150, 5: 225, 6: 300, 7: 375},   # Slant rhymes (intermediate)
+        }
+        
+        # Get base score for category and length, default to 100 if not found
+        base_score = base_scores.get(category, {}).get(word_length, 100)
+        
+        # Cache the result
+        self._base_score_cache[cache_key] = base_score
+        
+        return base_score
+    
+    def _calculate_category_bonus(self, category: str, creativity_score: float, word_length: int) -> float:
+        """
+        Calculate category-specific bonus based on transformation type and word length with caching.
         
         Args:
             category: Transformation category
             creativity_score: Creativity score (0-1)
+            word_length: Length of the word (3-7 characters)
             
         Returns:
             Category bonus points
         """
-        # Category bonus multipliers and max values
-        bonus_configs = {
-            # Rhyme bonuses (based on difficulty)
-            'prf': {'multiplier': 0.20, 'max_bonus': 100},  # Perfect rhymes (easier)
-            'rch': {'multiplier': 0.45, 'max_bonus': 225},  # Rich rhymes/homophones (harder)
-            'sln': {'multiplier': 0.35, 'max_bonus': 175},  # Slant rhymes (medium)
-            
-            # Anagram bonus (very creative)
-            'ana': {'multiplier': 0.50, 'max_bonus': 250},
-            
-            # One-letter-off bonuses (based on difficulty)
-            'ola': {'multiplier': 0.30, 'max_bonus': 150},  # Added letter
-            'olr': {'multiplier': 0.25, 'max_bonus': 125},  # Removed letter
-            'olx': {'multiplier': 0.40, 'max_bonus': 200},  # Changed letter
+        # Create cache key with rounded creativity score for better cache hits
+        creativity_rounded = round(creativity_score, 3)  # Round to 3 decimal places
+        cache_key = f"{category}_{word_length}_{creativity_rounded}"
+        
+        # Check cache first
+        if cache_key in self._bonus_cache:
+            return self._bonus_cache[cache_key]
+        
+        # Get base score for this category and length
+        base_score = self._get_base_score(category, word_length)
+        
+        # Calculate bonus: base_score × 0.5 × creativity_score
+        bonus = base_score * 0.5 * creativity_score
+        
+        # Cache the result (limit cache size to prevent memory issues)
+        if len(self._bonus_cache) < 1000:  # Limit cache to 1000 entries
+            self._bonus_cache[cache_key] = bonus
+        
+        return bonus
+    
+    def clear_scoring_caches(self):
+        """Clear all scoring caches to free memory."""
+        self._base_score_cache.clear()
+        self._bonus_cache.clear()
+        logger.info("🧹 Cleared scoring caches")
+    
+    def get_cache_stats(self) -> Dict[str, Any]:
+        """Get statistics about scoring cache usage."""
+        return {
+            "base_score_cache_size": len(self._base_score_cache),
+            "bonus_cache_size": len(self._bonus_cache),
+            "total_cache_entries": len(self._base_score_cache) + len(self._bonus_cache)
         }
-        
-        config = bonus_configs.get(category, {'multiplier': 0.25, 'max_bonus': 125})
-        
-        # Calculate bonus: multiplier × creativity_score × max_bonus
-        bonus = config['multiplier'] * creativity_score * config['max_bonus']
-        
-        return min(bonus, config['max_bonus'])
     
     async def score_candidate_comprehensive(self, start_word: str, candidate_word: str) -> Dict[str, Any]:
         """
@@ -763,12 +816,12 @@ class EnhancedScoringService:
                 tree, main_category, subcategory, candidate_tokens
             )
             
-            # Calculate base score (500-1000 points)
-            base_score = 500 + (500 * creativity_score)
+            # Calculate base score based on category and word length
+            base_score = self._get_base_score(transformation_category, len(candidate_word))
             
-            # Calculate category bonus based on transformation type
+            # Calculate category bonus based on transformation type and word length
             category_bonus = self._calculate_category_bonus(
-                transformation_category, creativity_score
+                transformation_category, creativity_score, len(candidate_word)
             )
             
             # Calculate total score

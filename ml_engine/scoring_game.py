@@ -95,10 +95,10 @@ class ScoringGame:
         bar_length = 50
         filled_length = int(bar_length * percentage)
         
-        bar = "█" * filled_length + "░" * (bar_length - filled_length)
-        
-        print(f"\n📊 Score Meter: {current_score:.0f} / {max_score}")
-        print(f"   [{bar}] {percentage*100:.1f}%")
+    bar = "█" * filled_length + "░" * (bar_length - filled_length)
+    
+    print(f"\n📊 Score Meter: {current_score:.0f} / {max_score}")
+    print(f"   [{bar}] {percentage*100:.1f}%")
     
     def display_contribution_bar(self, contribution: float, max_contribution: float = 500):
         """Display a bar showing the contribution of the last play."""
@@ -106,7 +106,7 @@ class ScoringGame:
         bar_length = 30
         filled_length = int(bar_length * percentage)
         
-        bar = "█" * filled_length + "░" * (bar_length - filled_length)
+            bar = "█" * filled_length + "░" * (bar_length - filled_length)
         
         print(f"🎯 Last Play Contribution: {contribution:.0f} points")
         print(f"   [{bar}] {percentage*100:.1f}%")
