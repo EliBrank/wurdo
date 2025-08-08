@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  ml-engine:
+    build: .
+    container_name: wurdo-ml-engine
+    volumes:
+      # Mount the current directory for development
+      - .:/app
+      # Mount a volume for persistent data
+      - ml_engine_data:/app/data
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    ports:
+      # Expose port for potential API access
+      - "8000:8000"
+    command: python test_setup.py
+    
+  # Interactive scoring game
+  scoring-game:
+    build: .
+    container_name: wurdo-scoring-game
+    volumes:
+      - .:/app
+      - ml_engine_data:/app/data
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true
+    command: python scoring_game.py
+    
+  # Optional Redis service for caching
+  redis:
+    image: redis:7-alpine
+    container_name: wurdo-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+volumes:
+  ml_engine_data:
+  redis_data: 

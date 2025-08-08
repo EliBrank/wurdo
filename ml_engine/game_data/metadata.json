@@ -1,0 +1,30 @@
+{
+  "generated_at": "2025-08-07 05:50:04",
+  "source_file": "scripts/data.csv",
+  "total_words": 165587,
+  "words_with_frequency": 165587,
+  "anagram_groups": 30678,
+  "avg_word_length": 5.514847180032249,
+  "word_length_distribution": {
+    "6": 45438,
+    "7": 44550,
+    "4": 25924,
+    "5": 37994,
+    "3": 11681
+  },
+  "frequency_distribution": {
+    "very_rare": 149320,
+    "rare": 11606,
+    "uncommon": 3793,
+    "common": 791,
+    "very_common": 77
+  },
+  "optimizations": [
+    "Uses canonical CSV word list (pre-approved)",
+    "Relaxed length range to 3-8 characters",
+    "No obscurity threshold (includes all words)",
+    "Rounded frequencies to 8 decimal places",
+    "Used collision-resistant prime signatures for anagrams",
+    "Removed singleton anagram groups"
+  ]
+}
