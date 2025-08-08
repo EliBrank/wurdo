@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { redis } from "@/lib/redis";
@@ -32,9 +33,7 @@ export async function getWordData(word: string): Promise<FullWordData | null> {
  * @param {string} [initialPronunciation] - Optional initial pronunciation.
  * @returns {Promise<boolean>} True if successful, false otherwise.
  */
-export async function createWordEntry(
-  word: string,
-): Promise<boolean> {
+export async function createWordEntry(word: string): Promise<boolean> {
   if (!word) {
     console.warn("createWordEntry called with empty word.");
     return false;
