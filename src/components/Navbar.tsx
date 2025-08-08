@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import Link from "next/link";
 
@@ -5,8 +7,8 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="p-4 bg-(--purple-main) text-white">
-      <div className="container mx-auto flex justify-between items-center">
+    <nav className="bg-(--purple-main) p-4 text-white">
+      <div className="container mx-auto flex items-center justify-between">
         {/* Logo */}
         {/* Put logo here instead of h1? */}
         <h1 className="font-bold ">
@@ -21,7 +23,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <ul className="md:hidden mt-2 p-4 space-y-2">
+        <ul className="mt-2 space-y-2 p-4 md:hidden">
           <li></li>
           <li>
             <Link href="/about">About</Link>

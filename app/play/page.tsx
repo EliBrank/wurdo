@@ -1,15 +1,15 @@
-"use client";
 import React from "react";
 import Navbar from "@/src/components/Navbar";
-import Link from "next/link";
+import { GameArea } from "@/src/components/GameArea";
+// import Link from "next/link";
 
-export default function SettingsPage() {
+export default function PlayPage() {
   return (
     <div>
       <Navbar />
       <main className="container mx-auto p-4">
         {/* Desktop-only message */}
-        <div className="hidden md:flex space-x-6 font-medium">
+        <div className="hidden space-x-6 font-medium md:flex">
           <p>
             Würdo was designed for mobile devices. Please use a mobile device to
             enjoy. Desktop coming soon!
@@ -17,8 +17,7 @@ export default function SettingsPage() {
         </div>
         {/* Page Content */}
         <section>
-          <p>Game Play coming soon!</p>
-          <Link href="/">Back</Link>
+          <GameArea />
         </section>
       </main>
     </div>
