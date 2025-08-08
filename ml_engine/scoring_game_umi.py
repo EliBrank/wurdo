@@ -99,7 +99,7 @@ class ScoringGame:
         self.generate_umi_suggestions()
         
         self.save_game_data()
-        print("🎮 New session started!")
+        print("New session started!")
         print("🌟 Umi is here to help you learn!")
     
     def get_start_word(self) -> str:
