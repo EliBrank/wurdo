@@ -37,39 +37,16 @@ To get a local copy of this project up and running for development, follow these
 * `Redis Server`: ...
 
 ### Backend Setup
-
-1.  Clone the repository:
-    ```bash
-    git clone ...
-    ```
-2.  Create a virtual environment:
-    ```bash
-    python -m venv venv
-    ```
-3.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-4.  Run preprocessing scripts:
-    ```bash
-    python preprocess_words.py
-    ```
+There are a number of libraries that we are utilizing to import words and have a full library.
 
 ## Usage
 
-To run the full application:
+To run the program there will be different methods.
 
-1.  Ensure your Redis server is running.
-2.  In the `backend` directory, start the API server:
-    ```bash
-    python app.py
-    ```
-3.  In a separate terminal in the project's root, start the React app:
-    ```bash
-    npm start
-    ```
 ## Project Status
-We will add this part later.
+Currently, our project has a clear scope and we are trying to incorporate the things we need to create
+a MVP. We currently are creating functionality for one letter removed, one letter changed and one letter added.
+
 
 ## Authors
 Kelci Atkinson - [Github](https://github.com/kelciatkinson) / [Email](kelciatkinson@gmail.com)

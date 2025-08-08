@@ -1,6 +1,17 @@
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #ece5d4;
   --foreground: #171717;
+  --purple-main: #76619f;
+  --green-main: #539c60;
+}
+
+@theme {
+  --font-family-orbitron: "Orbitron", sans-serif;
+}
+
+body {
+  background: var(--purple-main);
 }

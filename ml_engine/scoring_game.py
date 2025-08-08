@@ -10,6 +10,10 @@ import asyncio
 import sys
 import time
 from pathlib import Path
+from typing import List, Dict, Any, Optional
+from dataclasses import dataclass
+from datetime import datetime
+from utils.redis_DB_storage import populate_database_from_file
 
 sys.path.append(str(Path(__file__).parent))
 
@@ -25,19 +29,19 @@ def print_title():
     title_art = """
     ╔══════════════════════════════════════════════════════════════════════════════╗
     ║                                                                              ║
-    ║    ██╗    ██╗██╗   ██╗██████╗ ██████╗ ██████╗                           ║
-    ║    ██║    ██║██║   ██║██╔══██╗██╔══██╗██╔══██╗                           ║
-    ║    ██║ █╗ ██║██║   ██║██║  ██║██████╔╝██║  ██║                           ║
-    ║    ██║███╗██║██║   ██║██║  ██║██╔══██╗██║  ██║                           ║
-    ║    ╚███╔███╔╝╚██████╔╝██████╔╝██║  ██║██████╔╝                           ║
-    ║     ╚══╝╚══╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═════╝                            ║
+    ║    ██╗    ██╗██╗   ██╗██████╗ ██████╗   ██╗        ██╗                       ║             
+    ║    ██║    ██║╚═╝   ╚═╝██╔══██╗ ██╔══██╗ █╔╝  ████╗ ╚█║                       ║
+    ║    ██║ █╗ ██║██╗   ██╗██████╔╝ ██║  ██║ █║ ██╔══██╗ █║                       ║              
+    ║    ██║███╗██║██║   ██║██╔══██╗ ██║  ██║ █║ ██║  ██║ █║                       ║              
+    ║    ╚███╔███╔╝╚██████╔╝██║  ██║ ██████╔╝ ██╗╚████╔═╝██║                       ║              
+    ║     ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝  ╚═╝ ╚═══╝  ╚═╝                       ║               
     ║                                                                              ║
-    ║                    ✧ Transform • Anagram • Rhyme • One-Letter-Off ✧        ║
+    ║                     ✧ Anagram - Rhyme - One-Letter-Off ✧                    ║
     ║                                                                              ║
-    ║                        First word supplied - where will you go?             ║
-    ║                           Low stakes, high fun!                            ║
+    ║                    First word supplied - where will you go?                  ║
     ║                                                                              ║
-    ║                              atlas_school 2005                             ║
+    ║                                                                              ║ 
+    ║                              atlas_school 2025                               ║ 
     ║                                                                              ║
     ╚══════════════════════════════════════════════════════════════════════════════╝
     """
@@ -279,11 +283,13 @@ async def main():
         except KeyboardInterrupt:
             print("\n\nThanks for playing Würdo!")
             print_game_stats(session_data)
+            populate_database_from_file("ml_engine/game_data/probability_trees.json")
             break
         except EOFError:
             print("\n\nThanks for playing Würdo!")
             print_game_stats(session_data)
+            populate_database_from_file("ml_engine/game_data/probability_trees.json")
             break
 
 if __name__ == "__main__":
-    asyncio.run(main()) 
+    asyncio.run(main())
