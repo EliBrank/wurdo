@@ -211,7 +211,7 @@ huggingface/
 # Large data files
 *.csv
 #*.json
-*.txt
+#*.txt
 !requirements.txt
 !package.json
 !README.md
