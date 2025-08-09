@@ -5,9 +5,9 @@ import { GameArea } from "@/src/components/GameArea";
 
 export default function PlayPage() {
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <Navbar />
-      <main className="container mx-auto p-4">
+      <main className="container mx-auto flex flex-1 flex-col bg-blue-200 p-4">
         {/* Desktop-only message */}
         <div className="hidden space-x-6 font-medium md:flex">
           <p>
@@ -16,7 +16,7 @@ export default function PlayPage() {
           </p>
         </div>
         {/* Page Content */}
-        <section>
+        <section className="mt-auto">
           <GameArea />
         </section>
       </main>

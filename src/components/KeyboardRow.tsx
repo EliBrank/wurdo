@@ -14,7 +14,7 @@ export const KeyboardRow = ({
   onBackspace
 } : KeyboardRowProps) => {
   return (
-    <div className="align-items-center order-first mx-auto grid grid-cols-10 justify-center gap-1">
+    <div className="grid grid-cols-10 justify-end gap-1">
       {keys.map((key) => (
         <KeyboardKey
           key={key}

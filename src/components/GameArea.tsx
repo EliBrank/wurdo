@@ -25,7 +25,7 @@ export const GameArea = () => {
   }
 
   return (
-    <div>
+    <div className="h-full bg-amber-400">
       <Keyboard
         onKeyPress={handleKeyPress}
         onBackspace={handleBackspace}
