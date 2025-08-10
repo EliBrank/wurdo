@@ -341,6 +341,14 @@ class GameService:
             redis_sync_result = await self._populate_redis_with_new_words()
             self.logger.info(f"Redis sync completed: {redis_sync_result}")
             
+            # Clean up ML model resources to free memory
+            if hasattr(self.scoring_service, 'scorer') and self.scoring_service.scorer:
+                try:
+                    self.scoring_service.scorer.cleanup()
+                    self.logger.info("🧹 ML model resources cleaned up successfully")
+                except Exception as cleanup_error:
+                    self.logger.warning(f"ML model cleanup warning (non-critical): {cleanup_error}")
+            
             self.logger.info(f"Game ended successfully. Total rounds: {final_stats['total_rounds']}")
             
             return {
@@ -659,6 +667,19 @@ class GameService:
             Dict containing reset status
         """
         self.game_state = {}
+        
+        # Clear scoring caches to free memory
+        if self.scoring_service:
+            self.scoring_service.clear_scoring_caches()
+        
+        # Clean up ML model resources when resetting
+        if hasattr(self.scoring_service, 'scorer') and self.scoring_service.scorer:
+            try:
+                self.scoring_service.scorer.cleanup()
+                self.logger.info("🧹 ML model resources cleaned up during reset")
+            except Exception as cleanup_error:
+                self.logger.warning(f"ML model cleanup warning during reset (non-critical): {cleanup_error}")
+        
         self.logger.info("Game reset successfully")
         
         return {"status": "game_reset", "message": "Game has been reset"}
