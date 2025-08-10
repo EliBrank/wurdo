@@ -7,7 +7,7 @@ export default function PlayPage() {
   return (
     <div className="flex h-full flex-col">
       <Navbar />
-      <main className="container mx-auto flex flex-1 flex-col bg-blue-200 p-4">
+      <main className="xs:p-4 container mx-auto flex flex-1 flex-col bg-primary-light p-2">
         {/* Desktop-only message */}
         <div className="hidden space-x-6 font-medium md:flex">
           <p>
@@ -16,7 +16,7 @@ export default function PlayPage() {
           </p>
         </div>
         {/* Page Content */}
-        <section className="mt-auto">
+        <section className="h-full">
           <GameArea />
         </section>
       </main>

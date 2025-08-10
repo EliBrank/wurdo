@@ -20,7 +20,7 @@ export default function GameModeButton({
 
   const activeClasses = disabled
     ? ""
-    : "active:translate-y-1 active:shadow-[0_2px_0_0_#587F5F]";
+    : "active:translate-y-1 active:shadow-none";
 
   const handleClick = () => {
     if (disabled) return;
