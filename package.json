@@ -14,7 +14,10 @@
     "@xenova/transformers": "^2.17.2",
     "csv-parser": "^3.2.0",
     "dotenv": "^17.2.1",
+<<<<<<< HEAD
     "firebase": "^12.0.0",
+=======
+>>>>>>> origin/feature/game-ui
     "motion": "^12.23.12",
     "next": "15.4.4",
     "phonemize": "^1.0.0",

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Keyboard } from "./Keyboard";
 import { WordInput } from "./WordInput";
+import { WordHistory } from "./WordHistory";
 
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>('');
@@ -18,16 +19,17 @@ export const GameArea = () => {
     // Removes one letter from word input
     setTypedWord(prev => prev.slice(0, -1));
   }
-  const handleSubmit = () => {
-    // Check if word is between 3 and 7 letters
-    if (typedWord.length > minWordLength && typedWord.length < maxWordLength) {
-      // TODO: connect to word scoring service
-    }
-  }
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   // Preliminary check if word is between 3 and 7 letters
+  //   if (typedWord.length > minWordLength && typedWord.length < maxWordLength) {
+  //     // TODO: connect to word scoring service
+  //   }
+  // }
 
   return (
-    <div className="flex flex-col h-full pb-2">
-      {/* <WordHistory /> */}
+    <div className="flex h-full flex-col pb-2">
+      <WordHistory />
       <div className="mt-auto">
         <WordInput
           typedWord={typedWord}

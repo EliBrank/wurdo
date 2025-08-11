@@ -1,21 +1,21 @@
-type KeyboardKeyProps = {
+type KeyboardTileProps = {
   label: string;
   isBackspace?: boolean;
   onClick: () => void;
 }
 
-export const KeyboardKey = ({
+export const KeyboardTile = ({
   label,
   isBackspace = false,
   onClick
-} : KeyboardKeyProps) => {
+} : KeyboardTileProps) => {
 
   return (
     <button
       onClick={onClick}
       className={`
         ${isBackspace ? 'flex-[2]' : 'flex-[1]'} tile-purple
-        active:translate-y-1 active:shadow-none select-none
+        select-none active:translate-y-1 active:shadow-none
       `}
     >
       {label}
