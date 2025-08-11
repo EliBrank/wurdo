@@ -19,8 +19,6 @@ export async function getWordData(word: string): Promise<FullWordData | null> {
   try {
     const result = await redis.json.get(`word:${word.toLowerCase()}`, "$");
     return (result as FullWordData) || null;
-    const result = await redis.json.get(`word:${word.toLowerCase()}`, "$");
-    return (result as FullWordData) || null;
   } catch (err) {
     console.error(`Failed to get word data for "${word}":`, err);
     console.error(`Failed to get word data for "${word}":`, err);
@@ -101,7 +99,7 @@ export async function updateWordData(
     console.warn(
       `Word "${word}" does not exist. Cannot update. Consider calling createWordEntry first.`
     );
-    return createWordEntry(word, partialData.pronunciation);
+    return createWordEntry(word);
   }
 
   try {
@@ -213,7 +211,7 @@ export async function updateMultipleWords(
     // `exec()` sends all queued commands to Redis at once.
     const results = await transaction.exec();
 
-    if (results.some((res) => res[0] !== null)) {
+    if (results.some((res: any) => res[0] !== null)) {
       console.error("Some commands in the batch transaction failed:", results);
       // Depending on requirements, you might want more granular error handling here.
       return false;

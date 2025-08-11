@@ -16,7 +16,7 @@ const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true); // Toggle between login and sign up
   const router = useRouter();
 
-  const handleAuthAction = async (e) => {
+  const handleAuthAction = async (e: any) => {
     e.preventDefault();
     setError(""); // Clear previous errors
 
