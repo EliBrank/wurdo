@@ -4,9 +4,11 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 # 1. Import the CORS middleware
 from fastapi.middleware.cors import CORSMiddleware
-from ml_engine.services import
+from ml_engine.services.game_service import GameService
 
 app = FastAPI()
+game = GameService()
+
 
 # 2. Configure the CORS middleware
 origins = [
@@ -25,16 +27,27 @@ app.add_middleware(
 class WordInput(BaseModel):
     word: str
 
-@app.get("/")
+@app.get("/init")
 def read_root():
-    return {"message": "Welcome to the game engine API!"}
+   return game.initialized
+
+
+@app.get("/start")
+def startGame():
+    return game.start_game().__dict__
+
+@app.get("/end")
+def startGame():
+
+    return game.end_game().__dict__
 
 @app.post("/play")
 def play_word(word_input: WordInput):
-
+    move = game.process_player_move()
     return {
         "received_word": word_input.word,
-        "message": f"Your word '{word_input.word}' has been processed."
+        "message": f"Your word '{word_input.word}' has been processed.",
+        "game" :f"{move}"
     }
 
 
