@@ -5,8 +5,12 @@
 :root {
   --background: #ece5d4;
   --foreground: #171717;
+  --white-main: #FFF;
+  --black-main: #000;
   --purple-main: #76619f;
+  --purple-dark: #55496D;
   --green-main: #539c60;
+  --green-dark: #2C6B39;
   --navy-main: #24273F;
   --offwhite-main: #E8DDC5;
 }
@@ -15,18 +19,32 @@
   --font-family-orbitron: "Orbitron", sans-serif;
   --font-family-inter: "Inter", sans-serif;
 
+  --color-default-light: var(--white-main);
+  --color-default-dark: var(--black-main);
   --color-primary-dark: var(--navy-main);
   --color-primary-light: var(--offwhite-main);
   --color-secondary: var(--green-main);
+  --color-secondary-tint: var(--green-dark);
   --color-tertiary: var(--purple-main);
+  --color-tertiary-tint: var(--purple-dark);
+
+  --breakpoint-mobile: 30rem;
 }
 
-@layer components {
-  .letter-tile {
-
+@layer base {
+  /* Styling to apply to entire project */
+  body {
+    @apply text-primary-light font-family-inter
   }
 }
 
-body {
-  background: var(--purple-main);
+@layer components {
+  /* Use these as bases for common styling */
+  .tile-green {
+    @apply inline-block text-center text-lg h-10 touch-manipulation min-w-6 bg-(--color-secondary) rounded-lg shadow-[0_0.25rem_0_0_var(--color-secondary-tint)] font-semibold text-default-light
+  }
+
+  .tile-purple {
+    @apply inline-block text-center text-lg h-10 touch-manipulation min-w-6 bg-(--color-tertiary) rounded-lg shadow-[0_0.25rem_0_0_var(--color-tertiary-tint)] font-semibold text-default-light
+  }
 }

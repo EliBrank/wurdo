@@ -9,14 +9,13 @@ export const KeyboardKey = ({
   isBackspace = false,
   onClick
 } : KeyboardKeyProps) => {
+
   return (
     <button
       onClick={onClick}
       className={`
-        ${isBackspace ? 'col-span-2' : 'col-span-1'}
-        h-12 touch-manipulation rounded-md
-        bg-secondary text-lg font-semibold
-        select-none
+        ${isBackspace ? 'flex-[2]' : 'flex-[1]'} tile-purple
+        active:translate-y-1 active:shadow-none select-none
       `}
     >
       {label}

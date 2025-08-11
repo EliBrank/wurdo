@@ -2,34 +2,41 @@
 
 import { useState } from "react";
 import { Keyboard } from "./Keyboard";
+import { WordInput } from "./WordInput";
 
 export const GameArea = () => {
-  const [wordInput, setWordInput] = useState<string>('');
+  const [typedWord, setTypedWord] = useState<string>('');
   const minWordLength = 3, maxWordLength = 7;
 
   // EVENT HANDLERS
   const handleKeyPress = (key: string) => {
-    if (wordInput.length < maxWordLength) {
-      setWordInput(prev => prev + key);
+    if (typedWord.length < maxWordLength) {
+      setTypedWord(prev => prev + key);
     }
   }
   const handleBackspace = () => {
     // Removes one letter from word input
-    setWordInput(prev => prev.slice(0, -1));
+    setTypedWord(prev => prev.slice(0, -1));
   }
   const handleSubmit = () => {
     // Check if word is between 3 and 7 letters
-    if (wordInput.length > minWordLength && wordInput.length < maxWordLength) {
+    if (typedWord.length > minWordLength && typedWord.length < maxWordLength) {
       // TODO: connect to word scoring service
     }
   }
 
   return (
-    <div>
-      <Keyboard
-        onKeyPress={handleKeyPress}
-        onBackspace={handleBackspace}
-      />
+    <div className="flex flex-col h-full pb-2">
+      {/* <WordHistory /> */}
+      <div className="mt-auto">
+        <WordInput
+          typedWord={typedWord}
+        />
+        <Keyboard
+          onKeyPress={handleKeyPress}
+          onBackspace={handleBackspace}
+        />
+      </div>
     </div>
   );
 }

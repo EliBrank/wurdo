@@ -16,8 +16,10 @@ export const Keyboard = ({
     ['Z','X','C','V','B','N','M'],
   ];
 
+  const rowAlignments: ('left' | 'center' | 'right')[] = [ 'left', 'center', 'right' ];
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-auto">
       {keyboardLayout.map((row, index) => (
         <KeyboardRow
           // Key is just for map method

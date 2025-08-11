@@ -2,7 +2,7 @@ import { KeyboardKey } from "./KeyboardKey";
 
 type KeyboardRowProps = {
   keys: string[];
-  isLastRow: boolean;
+  isLastRow?: boolean;
   onKeyPress: (key: string) => void;
   onBackspace?: () => void;
 }
@@ -11,10 +11,15 @@ export const KeyboardRow = ({
   keys,
   isLastRow = false,
   onKeyPress,
-  onBackspace
+  onBackspace,
 } : KeyboardRowProps) => {
+  // +bool treats true/false as 1/0
+  // make last row 2 units longer because it has backspace
+  const rowWidth = (keys.length + (+isLastRow * 2)) * 10
+  console.log('rowWidth:', rowWidth);
+
   return (
-    <div className="align-items-center order-first mx-auto grid grid-cols-10 justify-center gap-1">
+    <div className={`max-w-[${rowWidth}%] ${isLastRow ? 'justify-end ml-auto' : 'mx-auto'} flex gap-1`}>
       {keys.map((key) => (
         <KeyboardKey
           key={key}
