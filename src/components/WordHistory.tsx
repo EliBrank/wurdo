@@ -1,4 +1,13 @@
-export const WordList = () => {
+export const WordHistory = () => {
+  const wordHistoryTest = [
+    'DRAB',
+    'DRAT',
+    'TRAD',
+    'TRADE',
+    'TRADER',
+    'TRADERS',
+  ];
+
   return (
     <div>
 
