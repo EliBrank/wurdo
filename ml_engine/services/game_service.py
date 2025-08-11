@@ -17,9 +17,9 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 
 # ML Engine imports - using existing, proven components
-from ml_engine.services.enhanced_scoring_service import get_enhanced_scoring_service
-from ml_engine.services.efficient_word_service import get_efficient_word_service
-from ml_engine.services.optimized_storage_service import get_optimized_storage_service, StorageConfig
+from services.enhanced_scoring_service import get_enhanced_scoring_service
+from services.efficient_word_service import get_efficient_word_service
+from services.optimized_storage_service import get_optimized_storage_service, StorageConfig
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
