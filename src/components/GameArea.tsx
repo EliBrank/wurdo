@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Keyboard } from "./Keyboard";
 import { WordInput } from "./WordInput";
-import { WordHistory } from "./WordHistory";
 
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>('');
@@ -28,7 +27,7 @@ export const GameArea = () => {
 
   return (
     <div className="flex flex-col h-full pb-2">
-      <WordHistory />
+      {/* <WordHistory /> */}
       <div className="mt-auto">
         <WordInput
           typedWord={typedWord}
