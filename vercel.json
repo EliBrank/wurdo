@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "./api/main.py",
+      "use": "@cercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/main.py"
+    }
+  ]
+}
