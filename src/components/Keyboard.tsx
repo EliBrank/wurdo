@@ -17,13 +17,14 @@ export const Keyboard = ({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="mt-auto space-y-4">
       {keyboardLayout.map((row, index) => (
         <KeyboardRow
           // Key is just for map method
           key={index}
           // Keys are for actual labels in keyboard
           keys={row}
+          rowIndex={index}
           // Calculate isLastRow dynamically
           // Last row will contain backspace
           isLastRow={index === keyboardLayout.length - 1}
