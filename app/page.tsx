@@ -8,14 +8,14 @@ export default function HomePage() {
   return (
     <div>
       <Navbar />
-      <main className="container mx-auto p-4 bg-(--background)">
+      <main className="mx-auto p-4 bg-(--background)">
         <div className="hidden md:flex font-medium">
           <p>
             würdo was designed for mobile. Please use a mobile device to enjoy.
             Desktop coming soon!
           </p>
         </div>
-        <section className="md:hidden min-h-screen flex flex-col items-center py-20">
+        <section className="flex min-h-screen flex-col items-center py-20 md:hidden">
           <GameModeButton label="Daily" href="/play" />
           <GameModeButton label="Infinite" href="/play" />
           <GameModeButton label="Challenge" href="/play" />
