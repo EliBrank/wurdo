@@ -74,9 +74,10 @@ export default function WordEditor() {
         });
         setMessage(`Word "${word}" not found. Fill out the form to create it.`);
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error("Error fetching word:", e);
-      setError(`Failed to fetch data: ${e.message || "Unknown error"}`);
+      const error = e as Error;
+      setError(`Failed to fetch data: ${error.message || "Unknown error"}`);
       setActiveWord(""); // Reset on error
     } finally {
       setIsLoading(false);
@@ -141,17 +142,18 @@ export default function WordEditor() {
       } else {
         setError(`Failed to save changes for "${activeWord}".`);
       }
-    } catch (e: any) {
+    } catch (e) {
       console.error("Error saving word:", e);
-      setError(`Failed to save data: ${e.message || "Unknown error"}`);
+      const error = e as Error;
+      setError(`Failed to save data: ${error.message || "Unknown error"}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="p-4 max-w-xl mx-auto bg-white rounded-lg shadow-md mt-8">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800 text-center">
+    <div className="mx-auto mt-8 max-w-xl rounded-lg bg-white p-4 shadow-md">
+      <h2 className="mb-4 text-center text-2xl font-bold text-gray-800">
         Word Data Manager
       </h2>
 
@@ -159,21 +161,21 @@ export default function WordEditor() {
       <div className="mb-4">
         <label
           htmlFor="wordInput"
-          className="block text-sm font-medium text-gray-700 mb-1"
+          className="mb-1 block text-sm font-medium text-gray-700"
         >
           Search for a Word
         </label>
         <div className="flex items-center space-x-2">
           <input
             id="wordInput"
-            className="border border-gray-300 p-2 rounded-md w-full focus:ring-blue-500 focus:border-blue-500"
+            className="w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:ring-blue-500"
             placeholder="e.g., 'apple', 'tiger'"
             value={word}
             onChange={(e) => setWord(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
           <button
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex-shrink-0"
+            className="flex-shrink-0 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
             onClick={handleSearch}
             disabled={isLoading || !word.trim()}
           >
@@ -183,7 +185,7 @@ export default function WordEditor() {
       </div>
 
       {/* --- Status Messages --- */}
-      <div className="text-center mb-4 min-h-[24px]">
+      <div className="mb-4 min-h-[24px] text-center">
         {isLoading && !message && (
           <p className="text-gray-500">Processing...</p>
         )}
@@ -198,15 +200,15 @@ export default function WordEditor() {
 
       {/* --- 2. Editor Form (shows after search) --- */}
       {activeWord && !isLoading && (
-        <div className="mt-4 border-t pt-4 border-gray-200">
-          <h3 className="text-lg font-semibold mb-3">
+        <div className="mt-4 border-t border-gray-200 pt-4">
+          <h3 className="mb-3 text-lg font-semibold">
             {data
               ? `Editing Data for "${activeWord}"`
               : `Create New Entry for "${activeWord}"`}
           </h3>
 
           <button
-            className="bg-green-600 text-white px-4 py-2 rounded-md mb-4 w-full hover:bg-green-700 transition-colors disabled:opacity-50"
+            className="mb-4 w-full rounded-md bg-green-600 px-4 py-2 text-white transition-colors hover:bg-green-700 disabled:opacity-50"
             onClick={handleSave}
             disabled={isLoading}
           >
@@ -222,7 +224,7 @@ export default function WordEditor() {
               <input
                 name="pronunciation"
                 type="text"
-                className="border p-2 rounded-md w-full mt-1"
+                className="mt-1 w-full rounded-md border p-2"
                 placeholder="Enter ARPABET pronunciation"
                 value={formData.pronunciation}
                 onChange={handleInputChange}
@@ -235,7 +237,7 @@ export default function WordEditor() {
                 One Letter Off (OLO)
               </label>
               {data?.olo && Object.keys(data.olo).length > 0 && (
-                <ul className="list-disc list-inside text-gray-600 text-sm mt-1 bg-gray-50 p-2 rounded">
+                <ul className="mt-1 list-inside list-disc rounded bg-gray-50 p-2 text-sm text-gray-600">
                   {Object.entries(data.olo).map(([w, s]) => (
                     <li key={w}>
                       {w} (Score: {s})
@@ -245,7 +247,7 @@ export default function WordEditor() {
               )}
               <input
                 name="newOloWord"
-                className="border p-2 rounded-md w-full mt-2"
+                className="mt-2 w-full rounded-md border p-2"
                 placeholder="Add new OLO word"
                 value={formData.newOloWord}
                 onChange={handleInputChange}
@@ -258,7 +260,7 @@ export default function WordEditor() {
                 Anagrams
               </label>
               {data?.ana && Object.keys(data.ana).length > 0 && (
-                <ul className="list-disc list-inside text-gray-600 text-sm mt-1 bg-gray-50 p-2 rounded">
+                <ul className="mt-1 list-inside list-disc rounded bg-gray-50 p-2 text-sm text-gray-600">
                   {Object.entries(data.ana).map(([w, s]) => (
                     <li key={w}>
                       {w} (Score: {s})
@@ -268,7 +270,7 @@ export default function WordEditor() {
               )}
               <input
                 name="newAnagramWord"
-                className="border p-2 rounded-md w-full mt-2"
+                className="mt-2 w-full rounded-md border p-2"
                 placeholder="Add new Anagram"
                 value={formData.newAnagramWord}
                 onChange={handleInputChange}
@@ -283,7 +285,7 @@ export default function WordEditor() {
               <form action={RhymeMicro}>
                 <input
                   name="newRhymeWord"
-                  className="border p-2 rounded-md w-full mt-2"
+                  className="mt-2 w-full rounded-md border p-2"
                   placeholder="Add new Rhyme"
                   value={formData.newRhymeWord}
                   onChange={handleInputChange}
@@ -291,7 +293,7 @@ export default function WordEditor() {
                 <input
                   name="word"
                   type="hidden"
-                  className="border p-2 rounded-md w-full mt-2"
+                  className="mt-2 w-full rounded-md border p-2"
                   placeholder="Add new Rhyme"
                   value={activeWord}
                 />
