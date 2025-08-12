@@ -8,11 +8,8 @@ import { WordHistory } from "./WordHistory";
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>('');
   const [wordHistory, setWordHistory] = useState<string[][]>([]);
-  const [animWord, setAnimWord] = useState<string | null>(null);
 
   const minWordLength = 3, maxWordLength = 7;
-  // Delay is in milliseconds
-  const animDelay = 400;
 
   // EVENT HANDLERS
   const handleKeyPress = (letter: string) => {
@@ -21,10 +18,12 @@ export const GameArea = () => {
       setTypedWord(prev => prev + letter);
     }
   }
+
   const handleBackspace = () => {
     // Removes one letter from word input
     setTypedWord(prev => prev.slice(0, -1));
   }
+
   const handleSubmit = async () => {
     // Preliminary check if word is between 3 and 7 letters
     if (typedWord.length < minWordLength || typedWord.length > maxWordLength) {
@@ -34,17 +33,8 @@ export const GameArea = () => {
     const wordValidation = await getWordData(typedWord);
     if (!wordValidation) return;
 
-    // Setting this word will animate it within WordInput
-    setAnimWord(typedWord);
-    // Clear text from input
+    setWordHistory(prev => [...prev, typedWord.split('')]);
     setTypedWord('');
-
-    setTimeout(() => {
-      // The word is then added here, after the delay of the animation
-      setWordHistory(prev => [...prev, typedWord.split('')]);
-      // Clear animation word
-      setAnimWord(null);
-    }, animDelay);
   }
 
   return (
@@ -53,8 +43,6 @@ export const GameArea = () => {
       <div className="mt-auto">
         <WordInput
           typedWord={typedWord}
-          animWord={animWord}
-          animDelay={animDelay}
           onSubmit={handleSubmit}
         />
         <Keyboard
