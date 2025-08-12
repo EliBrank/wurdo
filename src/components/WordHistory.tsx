@@ -1,4 +1,10 @@
-export const WordHistory = () => {
+type WordHistoryProps = {
+  wordStrings: string[][];
+}
+
+export const WordHistory = ({
+  wordStrings
+} : WordHistoryProps) => {
   const wordHistoryTest = [
     'DRAB',
     'DRAT',

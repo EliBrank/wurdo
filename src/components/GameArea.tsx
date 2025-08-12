@@ -7,32 +7,55 @@ import { WordHistory } from "./WordHistory";
 
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>('');
+  const [wordHistory, setWordHistory] = useState<string[][]>([]);
+  const [animWord, setAnimWord] = useState<string | null>(null);
+
   const minWordLength = 3, maxWordLength = 7;
+  // Delay is in milliseconds
+  const animDelay = 400;
 
   // EVENT HANDLERS
-  const handleKeyPress = (key: string) => {
+  const handleKeyPress = (letter: string) => {
+    // Add letter of pressed key (as long as word hasn't reached max length)
     if (typedWord.length < maxWordLength) {
-      setTypedWord(prev => prev + key);
+      setTypedWord(prev => prev + letter);
     }
   }
   const handleBackspace = () => {
     // Removes one letter from word input
     setTypedWord(prev => prev.slice(0, -1));
   }
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   // Preliminary check if word is between 3 and 7 letters
-  //   if (typedWord.length > minWordLength && typedWord.length < maxWordLength) {
-  //     // TODO: connect to word scoring service
-  //   }
-  // }
+  const handleSubmit = async () => {
+    // Preliminary check if word is between 3 and 7 letters
+    if (typedWord.length < minWordLength || typedWord.length > maxWordLength) {
+      return;
+    }
+    // TODO: connect to word scoring service
+    const wordValidation = await getWordData(typedWord);
+    if (!wordValidation) return;
+
+    // Setting this word will animate it within WordInput
+    setAnimWord(typedWord);
+    // Clear text from input
+    setTypedWord('');
+
+    setTimeout(() => {
+      // The word is then added here, after the delay of the animation
+      setWordHistory(prev => [...prev, typedWord.split('')]);
+      // Clear animation word
+      setAnimWord(null);
+    }, animDelay);
+  }
 
   return (
     <div className="flex h-full flex-col pb-2">
-      <WordHistory />
+      <WordHistory wordStrings={wordHistory} />
       <div className="mt-auto">
         <WordInput
           typedWord={typedWord}
+          animWord={animWord}
+          animDelay={animDelay}
+          onSubmit={handleSubmit}
         />
         <Keyboard
           onKeyPress={handleKeyPress}
@@ -41,4 +64,13 @@ export const GameArea = () => {
       </div>
     </div>
   );
+}
+
+// FIX: Temporary function - remove later
+async function getWordData(word: string) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(word.trim().length > 0)
+    }, 100)
+  });
 }
