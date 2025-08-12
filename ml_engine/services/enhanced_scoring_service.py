@@ -62,15 +62,16 @@ class EnhancedScoringService:
     4. Handles multi-token words correctly
     """
     
-    def __init__(self, model_name: str = "distilgpt2", device: str = "cpu", storage_type: str = "json", json_file_path: str = None):
+    def __init__(self, model_name: str = "distilgpt2", device: str = "cpu", storage_type: str = "json", json_file_path: str = None, storage_service=None):
         """
         Initialize enhanced scoring service with optimized storage.
         
         Args:
             model_name: Name of the ML model to use
             device: Device to run model on ('cpu' or 'cuda')
-            storage_type: Storage backend ('json' or 'redis')
-            json_file_path: Path to JSON storage file (defaults to main game_data location)
+            storage_type: Storage backend ('json' or 'redis') - only used if storage_service not provided
+            json_file_path: Path to JSON storage file (defaults to main game_data location) - only used if storage_service not provided
+            storage_service: Existing storage service instance to use (overrides storage_type and json_file_path)
         """
         # Set default path to main game_data location
         if json_file_path is None:
@@ -79,14 +80,18 @@ class EnhancedScoringService:
         self.model_name = model_name
         self.device = device
         
-        # Initialize storage with optimized configuration
-        storage_config = StorageConfig(
-            storage_type=storage_type,
-            json_file_path=json_file_path,
-            compression=True,
-            cache_size=1000
-        )
-        self.storage = get_optimized_storage_service(storage_config)
+        # Use provided storage service or create new one
+        if storage_service is not None:
+            self.storage = storage_service
+        else:
+            # Initialize storage with optimized configuration
+            storage_config = StorageConfig(
+                storage_type=storage_type,
+                json_file_path=json_file_path,
+                compression=True,
+                cache_size=1000
+            )
+            self.storage = get_optimized_storage_service(storage_config)
         
         # Initialize word service and scorer
         self.word_service = EfficientWordService(model_name, device)
@@ -127,7 +132,23 @@ class EnhancedScoringService:
             # Check if tree exists in storage
             if self.storage.has_probability_tree(start_word):
                 logger.debug(f"📦 Using cached probability tree for '{start_word}'")
-                return self.storage.get_probability_tree(start_word)
+                tree = self.storage.get_probability_tree(start_word)
+                
+                # DEBUG: Show which storage method was used
+                if hasattr(self.storage, 'config') and hasattr(self.storage.config, 'storage_type'):
+                    storage_type = self.storage.config.storage_type
+                    if storage_type == "hybrid":
+                        # For hybrid, check if it came from Redis or JSON
+                        if hasattr(self.storage, 'redis') and self.storage.redis.exists(f"tree:{start_word}"):
+                            logger.info(f"🎯 SCORING FROM REDIS STORAGE (efficient base64) for '{start_word}'")
+                        else:
+                            logger.info(f"📁 SCORING FROM JSON FILE STORAGE for '{start_word}'")
+                    elif storage_type == "redis":
+                        logger.info(f"🎯 SCORING FROM REDIS STORAGE (efficient base64) for '{start_word}'")
+                    else:
+                        logger.info(f"📁 SCORING FROM JSON FILE STORAGE for '{start_word}'")
+                
+                return tree
             
             # Build new tree
             logger.info(f"🔄 Building probability tree for '{start_word}'")
@@ -407,6 +428,7 @@ class EnhancedScoringService:
         
         if tree is None:
             logger.error(f"❌ Failed to get probability tree for '{start_word}'")
+            logger.info(f"🔄 FALLBACK: Using ML model calculation for '{start_word}' -> '{candidate_word}' (no probability tree available)")
             # Fallback to old method
             return self._calculate_transformation_score_fallback(start_word, candidate_word, transformation_category)
         
@@ -852,15 +874,16 @@ class EnhancedScoringService:
             logger.error(f"❌ Error calculating score with probability tree: {e}")
             return self._calculate_transformation_score_fallback(start_word, candidate_word, transformation_category, cached_transformations)
 
-def get_enhanced_scoring_service(model_name: str = "distilgpt2", device: str = "cpu", storage_type: str = "json", json_file_path: str = None) -> EnhancedScoringService:
+def get_enhanced_scoring_service(model_name: str = "distilgpt2", device: str = "cpu", storage_type: str = "json", json_file_path: str = None, storage_service=None) -> EnhancedScoringService:
     """
     Factory function to create EnhancedScoringService instance.
     
     Args:
         model_name: Name of the ML model to use
         device: Device to run model on ('cpu' or 'cuda')
-        storage_type: Storage backend ('json' or 'redis')
-        json_file_path: Path to JSON storage file (defaults to main game_data location)
+        storage_type: Storage backend ('json' or 'redis') - only used if storage_service not provided
+        json_file_path: Path to JSON storage file (defaults to main game_data location) - only used if storage_service not provided
+        storage_service: Existing storage service instance to use (overrides storage_type and json_file_path)
         
     Returns:
         Configured EnhancedScoringService instance
@@ -873,5 +896,6 @@ def get_enhanced_scoring_service(model_name: str = "distilgpt2", device: str = "
         model_name=model_name,
         device=device,
         storage_type=storage_type,
-        json_file_path=json_file_path
+        json_file_path=json_file_path,
+        storage_service=storage_service
     ) 
