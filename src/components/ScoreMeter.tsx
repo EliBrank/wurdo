@@ -1,1 +1,28 @@
-export default function ScoreMeter() {}
+import React from "react";
+
+interface ScoreMeterProps {
+  currentScore: number;
+  maxScore: number;
+}
+
+export default function ScoreMeter({
+  currentScore,
+  maxScore,
+}: ScoreMeterProps) {
+  const percentage =
+    maxScore > 0 ? ((maxScore - currentScore) / maxScore) * 100 : 100;
+
+  return (
+    <div className="w-[90%]">
+      <div className="w-full bg-(--navy-main) rounded h-3 flex items-center">
+        <div
+          className="bg-white h-1.5 transition-all ml-1 duration-300"
+          style={{ width: `${Math.min(percentage, 100)}%` }}
+        />
+      </div>
+      <div className="text-sm mt-1 text-center text-black">
+        {maxScore - currentScore} plays left
+      </div>
+    </div>
+  );
+}

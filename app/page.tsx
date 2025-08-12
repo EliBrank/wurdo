@@ -8,7 +8,7 @@ export default function HomePage() {
   return (
     <div>
       <Navbar />
-      <main className="container mx-auto p-4 bg-(--background)">
+      <main className="mx-auto p-4 bg-(--background)">
         <div className="hidden md:flex font-medium">
           <p>
             würdo was designed for mobile. Please use a mobile device to enjoy.

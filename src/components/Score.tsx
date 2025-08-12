@@ -1,11 +1,14 @@
 import React from "react";
 
-export default function Score({ score, display }) => {
+interface ScoreProps {
+  score: number;
+}
+
+export default function Score({ score }: ScoreProps) {
   return (
-    <div
-      className=""
-    >
-      {label}
+    <div className="text-xl font-bold text-(--navy-main) flex flex-row items-baseline self-end relative top-2 mr-2">
+      <span>{score}</span>
+      <span className="text-xs ml-2 text-(--navy-main)">PTS</span>
     </div>
   );
 }
