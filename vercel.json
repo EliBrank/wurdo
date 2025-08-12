@@ -5,18 +5,14 @@
       "use": "@vercel/next"
     },
     {
-      "src": "./api/main.py",
+      "src": "./ml_engine/main.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/main.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "$1"
+      "dest": "/ml_engine/main.py"
     }
   ]
 }
