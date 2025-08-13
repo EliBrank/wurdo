@@ -19,16 +19,16 @@ import {
 export async function RhymeMicro(formData: FormData){
     const word = formData.get("word") as string;
     const wordToAdd = formData.get("newRhymeWord") as string;
-    const randomNum = Math.floor(Math.random() * 100);
+    const randomNum = (Math.floor(Math.random() * 100))
 
-  if (!word) return console.warn("No word provided");
-  const check = await getWordData(word);
-  const newWordToAdd = `${wordToAdd.toLowerCase()}`;
-  if (check !== null) {
-    const rhyme: PartialUpdateData = { rhyme: { [newWordToAdd]: randomNum } };
-    const data = await updateWordData(word, rhyme);
-    data;
-  }
+    if (!word) return console.warn("No word provided")
+    const check = (await getWordData(word))
+    const newWordToAdd = `${wordToAdd.toLowerCase()}`
+    if ( check !== null){
+        const rhyme:PartialUpdateData = {rhyme: {[newWordToAdd]: randomNum}}
+        const data = await updateWordData(word, rhyme)
+         data
+    }
 }
 
 export async function oloMicro(word: string, wordToAdd: string) {
