@@ -5,7 +5,7 @@ type WordInputProps = {
 
 export const WordInput = ({ typedWord, onSubmit }: WordInputProps) => {
   return (
-    <div className="fit-content mx-auto mt-24 mb-4 flex max-w-100 items-end justify-center gap-2 px-8">
+    <div className="fit-content mx-auto mb-4 flex max-w-100 items-end justify-center gap-2 px-8">
       <span className="flex flex-1 border-b-2 border-primary-dark text-xl tracking-wider text-primary-dark">
         {typedWord}
       </span>

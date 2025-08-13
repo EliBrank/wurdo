@@ -7,8 +7,7 @@ type WordHistoryProps = {
 export const WordHistory = ({ wordStrings }: WordHistoryProps) => {
   return (
     <div
-      className="flex h-48 flex-col-reverse overflow-y-auto border bg-green-500 p-2"
-      style={{ scrollbarWidth: "thin" }}
+      className="flex min-h-48 flex-col-reverse overflow-y-auto border bg-green-500 p-2"
     >
       <AnimatePresence initial={false}>
         {[...wordStrings].reverse().map((letters) => (
