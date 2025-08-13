@@ -64,6 +64,7 @@ async def get_game_status_endpoint():
 async def start_new_game_endpoint(data: StartGameInput):
     try:
         # We now use the correct variable: game_service
+        await game_service.reset_game()
         return await game_service.start_game(data.start_word)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -76,10 +77,23 @@ async def play_player_move_endpoint(data: PlayerMoveInput):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.post("/end")
+@app.get("/end")
 async def end_current_game_endpoint():
     try:
         # We now use the correct variable: game_service
-        return await game_service.end_game()
+        await game_service.end_game()
+        return await game_service.reset_game()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.post("/reset")
+async def reset_game_endpoint():
+    """
+    Optional endpoint to manually reset the game state.
+    """
+    if not game_service:
+        raise HTTPException(status_code=503, detail="Game service is not initialized.")
+    try:
+        return await game_service.reset_game()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

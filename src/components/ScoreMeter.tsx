@@ -1,14 +1,17 @@
+"use client";
 import React from "react";
+import { useGameContext } from "@/context";
 
 interface ScoreMeterProps {
   currentScore: number;
   maxScore: number;
 }
 
-export default function ScoreMeter({
-  currentScore,
-  maxScore,
-}: ScoreMeterProps) {
+export default function ScoreMeter() {
+  const { currentScore, maxScore } = useGameContext();
+  if (maxScore === undefined) return 0;
+  if (currentScore === undefined) return 0;
+
   const percentage =
     maxScore > 0 ? ((maxScore - currentScore) / maxScore) * 100 : 100;
 
