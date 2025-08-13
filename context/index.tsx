@@ -18,17 +18,17 @@ export function GameContextWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const [currentScore, setCurrentScore] = useState(0);
-  const [maxScore, setMaxScore] = useState(0);
+  const [wordScore, setWordScore] = useState(0);
+  const [totalScore, setTotalScore] = useState(0);
   const [startWord, setStartWord] = useState("free");
 
   return (
     <GameContext.Provider
       value={{
-        currentScore,
-        setCurrentScore,
-        maxScore,
-        setMaxScore,
+        wordScore,
+        setWordScore,
+        totalScore,
+        setTotalScore,
         startWord,
         setStartWord,
       }}
