@@ -8,12 +8,11 @@ interface ScoreMeterProps {
 }
 
 export default function ScoreMeter() {
-  const { currentScore, maxScore } = useGameContext();
+  const { wordScore, totalScore, maxScore, setTotalScore } = useGameContext();
   if (maxScore === undefined) return 0;
-  if (currentScore === undefined) return 0;
+  if (wordScore === undefined) return 0;
 
-  const percentage =
-    maxScore > 0 ? ((maxScore - currentScore) / maxScore) * 100 : 100;
+  setTotalScore(Math.round(totalScore + wordScore));
 
   return (
     <div className="w-full">
@@ -23,9 +22,7 @@ export default function ScoreMeter() {
           style={{ width: `${Math.min(percentage, 100)}%` }}
         />
       </div>
-      <div className="text-sm mt-1 text-center text-black">
-        {maxScore - currentScore} plays left
-      </div>
+      <div className="text-sm mt-1 text-center text-black"></div>
     </div>
   );
 }

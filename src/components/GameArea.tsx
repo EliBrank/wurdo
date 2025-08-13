@@ -31,19 +31,27 @@ export const GameArea = () => {
   };
 
   const handleSubmit = async () => {
-    // Preliminary check if word is between 3 and 7 letters
-    if (typedWord.length < minWordLength || typedWord.length > maxWordLength) {
+    if (typedWord.length < minWordLength || typedWord.length > maxWordLength)
       return;
-    }
-    if (wordHistory.includes(typedWord)) {
-      return;
-    }
-    // TODO: connect to word scoring service
-    const wordValidation = await playGame(typedWord.toLocaleLowerCase());
-    if (!wordValidation) return;
+    if (wordHistory.includes(typedWord)) return;
 
-    setCurrentScore(await wordValidation.player_result.data.total_score);
-    setMaxScore(await wordValidation.player_result.data.max_score);
+    const wordValidation = await playGame(typedWord.toLowerCase());
+    console.log("wordValidation:", wordValidation);
+
+    // If the server says it's a duplicate or invalid word
+    if (
+      wordValidation.status !== "move_processed" ||
+      !wordValidation?.player_result?.data
+    ) {
+      console.warn(
+        "Invalid move:",
+        wordValidation.error || wordValidation.status
+      );
+      return;
+    }
+
+    setCurrentScore(wordValidation.player_result.data.total_score);
+    setMaxScore(wordValidation.player_result.data.max_possible_score);
 
     setWordHistory((prev) => [...prev, typedWord]);
     setTypedWord("");
