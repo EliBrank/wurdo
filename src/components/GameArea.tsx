@@ -10,8 +10,9 @@ import { useGameContext } from "@/context";
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>("");
   const [wordHistory, setWordHistory] = useState<string[]>([]);
-  const { wordScore } = useGameContext();
   const { setWordScore, setTotalScore } = useGameContext();
+  const { turns, setTurns } = useGameContext();
+  const { gameOver, setGameOver } = useGameContext();
 
   if (!setWordScore) return;
   if (!setTotalScore) return;
@@ -33,6 +34,10 @@ export const GameArea = () => {
   };
 
   const handleSubmit = async () => {
+    if (turns <= 0 || gameOver) {
+      return;
+    }
+
     if (typedWord.length < minWordLength || typedWord.length > maxWordLength)
       return;
     if (wordHistory.includes(typedWord)) return;
@@ -54,11 +59,17 @@ export const GameArea = () => {
     const wordScoreValue = Math.round(
       wordValidation.player_result.data.total_score
     );
-
+    setWordScore(wordScoreValue);
     setTotalScore((prev) => prev + wordScoreValue);
 
     setWordHistory((prev) => [...prev, typedWord]);
     setTypedWord("");
+
+    const roundTurns = turns - 1;
+    setTurns(roundTurns);
+    if (roundTurns === 0) {
+      setGameOver(true);
+    }
   };
 
   return (

@@ -6,10 +6,10 @@ import Link from "next/link";
 
 export default async function ScoreArea() {
   return (
-    <div className="absolute left-4 right-4 flex flex-col items-center z-10">
+    <div className="px-4 flex flex-col items-center">
       <div className="flex flex-row justify-between w-full mb-2 items-end">
         <div className="flex flex-col">
-          <Link href="/" className="self-start">
+          <Link href="/" id="back-button">
             <div className="text-xl font-bold text-(--navy-main) mb-2">
               &lt;-
             </div>
@@ -18,7 +18,6 @@ export default async function ScoreArea() {
         </div>
         <Score />
       </div>
-
       <ScoreMeter />
     </div>
   );
