@@ -279,28 +279,6 @@ export default function WordEditor() {
             </div>
 
             {/* Rhymes */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Rhymes
-              </label>
-              <form action={RhymeMicro}>
-                <input
-                  name="newRhymeWord"
-                  className="mt-2 w-full rounded-md border p-2"
-                  placeholder="Add new Rhyme"
-                  value={formData.newRhymeWord}
-                  onChange={handleInputChange}
-                />
-                <input
-                  name="word"
-                  type="hidden"
-                  className="mt-2 w-full rounded-md border p-2"
-                  placeholder="Add new Rhyme"
-                  value={activeWord}
-                />
-                <button type="submit">Click here to test</button>
-              </form>
-            </div>
           </div>
         </div>
       )}
