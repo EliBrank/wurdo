@@ -70,7 +70,7 @@ export async function endGame() {
     }
     return await response.json();
   } catch (error) {
-    console.error("Failed to start game:", error);
+    console.error("Failed to end game:", error);
     throw error;
   }
 }
