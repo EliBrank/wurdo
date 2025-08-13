@@ -61,7 +61,7 @@ export async function playGame(candidateWord: string) {
 
 export async function endGame() {
   try {
-    const response = await fetch("http://localhost:8000/play");
+    const response = await fetch("http://localhost:8000/end");
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(

@@ -9,7 +9,7 @@ import { useGameContext } from "@/context";
 
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>("");
-  const [wordHistory, setWordHistory] = useState<string[][]>([]);
+  const [wordHistory, setWordHistory] = useState<string[]>([]);
   const { setCurrentScore, setMaxScore } = useGameContext();
   if (!setCurrentScore) return;
   if (!setMaxScore) return;
@@ -31,37 +31,39 @@ export const GameArea = () => {
   };
 
   const handleSubmit = async () => {
-    // Preliminary check if word is between 3 and 7 letters
-    if (typedWord.length < minWordLength || typedWord.length > maxWordLength) {
+    if (typedWord.length < minWordLength || typedWord.length > maxWordLength)
+      return;
+    if (wordHistory.includes(typedWord)) return;
+
+    const wordValidation = await playGame(typedWord.toLowerCase());
+    console.log("wordValidation:", wordValidation);
+
+    // If the server says it's a duplicate or invalid word
+    if (
+      wordValidation.status !== "move_processed" ||
+      !wordValidation?.player_result?.data
+    ) {
+      console.warn(
+        "Invalid move:",
+        wordValidation.error || wordValidation.status
+      );
       return;
     }
-    // TODO: connect to word scoring service
-    const wordValidation = await playGame(typedWord.toLocaleLowerCase());
-    if (!wordValidation) return;
 
-    setCurrentScore(await wordValidation.player_result.data.total_score);
-    setMaxScore(await wordValidation.player_result.data.max_score);
+    setCurrentScore(wordValidation.player_result.data.total_score);
+    setMaxScore(wordValidation.player_result.data.max_possible_score);
 
-    setWordHistory((prev) => [...prev, typedWord.split("")]);
+    setWordHistory((prev) => [...prev, typedWord]);
     setTypedWord("");
   };
 
   return (
-    <div className="flex h-full flex-col pb-2">
-      <WordHistory wordStrings={wordHistory} />
-      <div className="mt-auto">
+    <div className="mt-auto flex flex-col pb-2">
+      <WordHistory words={wordHistory} />
+      <div className="mt-16">
         <WordInput typedWord={typedWord} onSubmit={handleSubmit} />
         <Keyboard onKeyPress={handleKeyPress} onBackspace={handleBackspace} />
       </div>
     </div>
   );
 };
-
-// FIX: Temporary function - remove later
-async function getWordData(word: string) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(word.trim().length > 0);
-    }, 100);
-  });
-}
