@@ -14,7 +14,7 @@ export default function ScoreMeter() {
     <div className="w-full">
       <div className="w-full bg-(--navy-main) rounded h-3 flex items-center">
         <div
-          className="bg-white h-1.5 transition-all ml-1 duration-800"
+          className="bg-white h-1.5 transition-all mx-1 duration-800"
           style={{ width: `${Math.min(percentage)}%` }}
         ></div>
       </div>
