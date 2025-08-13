@@ -35,6 +35,9 @@ export const GameArea = () => {
     if (typedWord.length < minWordLength || typedWord.length > maxWordLength) {
       return;
     }
+    if (wordHistory.includes(typedWord)) {
+      return;
+    }
     // TODO: connect to word scoring service
     const wordValidation = await playGame(typedWord.toLocaleLowerCase());
     if (!wordValidation) return;

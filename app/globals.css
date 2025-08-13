@@ -41,10 +41,10 @@
 @layer components {
   /* Use these as bases for common styling */
   .tile-green {
-    @apply inline-block text-center text-lg h-10 touch-manipulation min-w-6 bg-(--color-secondary) rounded-lg shadow-[0_0.25rem_0_0_var(--color-secondary-tint)] font-semibold text-default-light
+    @apply inline-block text-lg h-10 min-w-6 w-full touch-manipulation bg-[var(--color-secondary)] rounded-lg shadow-[0_0.25rem_0_0_var(--color-secondary-tint)] font-semibold text-default-light -translate-y-1;
   }
 
   .tile-purple {
-    @apply inline-block text-center text-lg h-10 touch-manipulation min-w-6 bg-(--color-tertiary) rounded-lg shadow-[0_0.25rem_0_0_var(--color-tertiary-tint)] font-semibold text-default-light
+    @apply inline-block text-center text-lg h-10 touch-manipulation min-w-6 bg-(--color-tertiary) rounded-lg shadow-[0_0.25rem_0_0_var(--color-tertiary-tint)] font-semibold text-default-light -translate-y-1
   }
 }
