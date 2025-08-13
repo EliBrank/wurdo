@@ -4,7 +4,7 @@ from upstash_redis import Redis
 import os
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path=".env.local")
+load_dotenv(dotenv_path="../.env.local")
 
 
 # The Upstash Redis connection.
@@ -17,6 +17,10 @@ redis_client = Redis(
 
 # The TypeScript types can be represented as a Python dictionary.
 FullWordData = Dict[str, Any]
+
+async def get_redis_connection():
+    """Get Redis connection for use in other modules"""
+    return redis_client
 
 async def get_word_data(word: str) -> Optional[FullWordData]:
     """
@@ -49,32 +53,38 @@ async def get_word_data(word: str) -> Optional[FullWordData]:
         return None
    
    
-def add_word_data(word: str, word_data: Dict[str, any]):
-    """_summary_
+async def add_word_data(word: str, word_data: Dict[str, any]):
+    """Add word data to Redis database
 
     Args:
         word (str): The word that is to be created
-        obj (obj): The objects to populate the word created
+        word_data (Dict): The objects to populate the word created
 
     Returns:
-        Optional[FullWordData]: Success confirmation
+        bool: Success confirmation
     """
     if not word or not word_data:
-        print("add_word_data requires both a word and ")
-        return
+        print("add_word_data requires both a word and word_data")
+        return False
+    
     key = f"word:{word.lower()}"
     try:
-        result = redis_client.json.set(key, "$", word_data)
+        # Ensure the Redis client is properly awaited
+        result = await redis_client.json.set(key, "$", word_data)
+        
         # The Upstash redis.json.set() will use the word for path and the obj to populate
         if result == "OK":
-            print("SUccess")
+            print(f"Successfully added '{word}' to Redis")
             return True
         else:
-            return None
+            print(f"Failed to add '{word}' to Redis: {result}")
+            return False
+            
     except Exception as err:
-        print(f"An error occured while adding '{word}' Error:{err}")
-       
-       
+        print(f"An error occurred while adding '{word}' Error: {err}")
+        return False
+   
+   
 async def populate_database_from_file(file_path: str) -> tuple[int, int]:
     """
     Reads a JSON file, and populates the Redis database with the words found.
@@ -111,7 +121,7 @@ async def populate_database_from_file(file_path: str) -> tuple[int, int]:
     for word, data in words_to_add.items():
         total_words += 1
         print(f"-> Attempting to add '{word}'...")
-        success = add_word_data(word, data)
+        success = await add_word_data(word, data)
         if success:
             successful_adds += 1
 

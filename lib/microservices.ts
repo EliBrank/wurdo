@@ -15,11 +15,17 @@ import {
  * the @param wordToAdd is the word to add. and the function will do the rest like converting
  * it to a object and storing it appropiatly
  * As of right now it adds one word per call tho
+<<<<<<<<< Temporary merge branch 1
  **/
-export async function RhymeMicro(formData: FormData) {
-  const word = formData.get("word") as string;
-  const wordToAdd = formData.get("newRhymeWord") as string;
+export async function RhymeMicro(word: string, wordToAdd: string) {
   const randomNum = Math.floor(Math.random() * 100);
+=========
+**/ 
+export async function RhymeMicro(formData: FormData){
+    const word = formData.get("word") as string;
+    const wordToAdd = formData.get("newRhymeWord") as string;
+    const randomNum = (Math.floor(Math.random() * 100))
+>>>>>>>>> Temporary merge branch 2
 
   if (!word) return console.warn("No word provided");
   const check = await getWordData(word);
