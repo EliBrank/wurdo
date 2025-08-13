@@ -20,7 +20,7 @@ export function GameContextWrapper({
 }) {
   const [currentScore, setCurrentScore] = useState(0);
   const [maxScore, setMaxScore] = useState(0);
-  const [startWord, setStartWord] = useState("Hello");
+  const [startWord, setStartWord] = useState("free");
 
   return (
     <GameContext.Provider

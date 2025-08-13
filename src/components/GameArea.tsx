@@ -9,7 +9,7 @@ import { useGameContext } from "@/context";
 
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>("");
-  const [wordHistory, setWordHistory] = useState<string[][]>([]);
+  const [wordHistory, setWordHistory] = useState<string[]>([]);
   const { setCurrentScore, setMaxScore } = useGameContext();
   if (!setCurrentScore) return;
   if (!setMaxScore) return;
@@ -45,13 +45,13 @@ export const GameArea = () => {
     setCurrentScore(await wordValidation.player_result.data.total_score);
     setMaxScore(await wordValidation.player_result.data.max_score);
 
-    setWordHistory((prev) => [...prev, typedWord.split("")]);
+    setWordHistory((prev) => [...prev, typedWord]);
     setTypedWord("");
   };
 
   return (
     <div className="flex h-full flex-col pb-2">
-      <WordHistory wordStrings={wordHistory} />
+      <WordHistory words={wordHistory} />
       <div className="mt-auto">
         <WordInput typedWord={typedWord} onSubmit={handleSubmit} />
         <Keyboard onKeyPress={handleKeyPress} onBackspace={handleBackspace} />
