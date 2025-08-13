@@ -1,16 +1,20 @@
 type WordInputProps = {
   typedWord: string;
+  onSubmit: () => void;
 };
 
-export const WordInput = ({
-  typedWord
-} : WordInputProps) => {
+export const WordInput = ({ typedWord, onSubmit }: WordInputProps) => {
   return (
-    <div className="flex justify-center items-end gap-2 mx-auto fit-content mb-4 px-8 max-w-100">
-      <span className="border-b-2 border-primary-dark text-primary-dark text-xl flex flex-1 tracking-wider">
+    <div className="fit-content mx-auto mb-4 flex max-w-100 items-end justify-center gap-2 px-8">
+      <span className="flex flex-1 border-b-2 border-primary-dark text-xl tracking-wider text-primary-dark">
         {typedWord}
       </span>
-      <button className="flex justify-center items-center h-8 w-8 rounded-full bg-primary-dark text-2xl text-default-light font-black">🡒</button>
+      <button
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-dark text-2xl font-black text-default-light"
+        onClick={onSubmit}
+      >
+        🡒
+      </button>
     </div>
   );
-}
+};

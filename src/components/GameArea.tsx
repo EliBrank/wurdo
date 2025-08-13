@@ -4,41 +4,70 @@ import { useState } from "react";
 import { Keyboard } from "./Keyboard";
 import { WordInput } from "./WordInput";
 import { WordHistory } from "./WordHistory";
+import { playGame } from "@/lib/gsActions";
+import { useGameContext } from "@/context";
 
 export const GameArea = () => {
-  const [typedWord, setTypedWord] = useState<string>('');
-  const minWordLength = 3, maxWordLength = 7;
+  const [typedWord, setTypedWord] = useState<string>("");
+  const [wordHistory, setWordHistory] = useState<string[]>([]);
+  const { wordScore } = useGameContext();
+  const { setWordScore, setTotalScore } = useGameContext();
+
+  if (!setWordScore) return;
+  if (!setTotalScore) return;
+
+  const minWordLength = 3,
+    maxWordLength = 7;
 
   // EVENT HANDLERS
-  const handleKeyPress = (key: string) => {
+  const handleKeyPress = (letter: string) => {
+    // Add letter of pressed key (as long as word hasn't reached max length)
     if (typedWord.length < maxWordLength) {
-      setTypedWord(prev => prev + key);
+      setTypedWord((prev) => prev + letter);
     }
-  }
+  };
+
   const handleBackspace = () => {
     // Removes one letter from word input
-    setTypedWord(prev => prev.slice(0, -1));
-  }
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   // Preliminary check if word is between 3 and 7 letters
-  //   if (typedWord.length > minWordLength && typedWord.length < maxWordLength) {
-  //     // TODO: connect to word scoring service
-  //   }
-  // }
+    setTypedWord((prev) => prev.slice(0, -1));
+  };
+
+  const handleSubmit = async () => {
+    if (typedWord.length < minWordLength || typedWord.length > maxWordLength)
+      return;
+    if (wordHistory.includes(typedWord)) return;
+
+    const wordValidation = await playGame(typedWord.toLowerCase());
+
+    // If the server says it's a duplicate or invalid word
+    if (
+      wordValidation.status !== "move_processed" ||
+      !wordValidation?.player_result?.data
+    ) {
+      console.warn(
+        "Invalid move:",
+        wordValidation.error || wordValidation.status
+      );
+      return;
+    }
+
+    const wordScoreValue = Math.round(
+      wordValidation.player_result.data.total_score
+    );
+
+    setTotalScore((prev) => prev + wordScoreValue);
+
+    setWordHistory((prev) => [...prev, typedWord]);
+    setTypedWord("");
+  };
 
   return (
-    <div className="flex h-full flex-col pb-2">
-      <WordHistory />
-      <div className="mt-auto">
-        <WordInput
-          typedWord={typedWord}
-        />
-        <Keyboard
-          onKeyPress={handleKeyPress}
-          onBackspace={handleBackspace}
-        />
+    <div className="mt-auto flex flex-col pb-2">
+      <WordHistory words={wordHistory} />
+      <div className="mt-16">
+        <WordInput typedWord={typedWord} onSubmit={handleSubmit} />
+        <Keyboard onKeyPress={handleKeyPress} onBackspace={handleBackspace} />
       </div>
     </div>
   );
-}
+};

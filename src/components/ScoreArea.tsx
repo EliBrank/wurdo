@@ -4,12 +4,7 @@ import ScoreMeter from "./ScoreMeter";
 import Logo from "./Logo";
 import Link from "next/link";
 
-interface ScoreAreaProps {
-  currentScore: number;
-  maxScore: number;
-}
-
-export default function ScoreArea({ currentScore, maxScore }: ScoreAreaProps) {
+export default async function ScoreArea() {
   return (
     <div className="absolute left-4 right-4 flex flex-col items-center z-10">
       <div className="flex flex-row justify-between w-full mb-2 items-end">
@@ -21,10 +16,10 @@ export default function ScoreArea({ currentScore, maxScore }: ScoreAreaProps) {
           </Link>
           <Logo />
         </div>
-        <Score score={currentScore} />
+        <Score />
       </div>
 
-      <ScoreMeter currentScore={currentScore} maxScore={maxScore} />
+      <ScoreMeter />
     </div>
   );
 }
