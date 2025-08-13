@@ -10,9 +10,11 @@ import { useGameContext } from "@/context";
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>("");
   const [wordHistory, setWordHistory] = useState<string[]>([]);
-  const { setCurrentScore, setMaxScore } = useGameContext();
-  if (!setCurrentScore) return;
-  if (!setMaxScore) return;
+  const { wordScore } = useGameContext();
+  const { setWordScore, setTotalScore } = useGameContext();
+
+  if (!setWordScore) return;
+  if (!setTotalScore) return;
 
   const minWordLength = 3,
     maxWordLength = 7;
@@ -36,7 +38,6 @@ export const GameArea = () => {
     if (wordHistory.includes(typedWord)) return;
 
     const wordValidation = await playGame(typedWord.toLowerCase());
-    console.log("wordValidation:", wordValidation);
 
     // If the server says it's a duplicate or invalid word
     if (
@@ -50,8 +51,11 @@ export const GameArea = () => {
       return;
     }
 
-    setCurrentScore(wordValidation.player_result.data.total_score);
-    setMaxScore(wordValidation.player_result.data.max_possible_score);
+    const wordScoreValue = Math.round(
+      wordValidation.player_result.data.total_score
+    );
+
+    setTotalScore((prev) => prev + wordScoreValue);
 
     setWordHistory((prev) => [...prev, typedWord]);
     setTypedWord("");
