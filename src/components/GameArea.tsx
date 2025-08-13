@@ -7,7 +7,7 @@ import { WordHistory } from "./WordHistory";
 
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>('');
-  const [wordHistory, setWordHistory] = useState<string[][]>([]);
+  const [wordHistory, setWordHistory] = useState<string[]>([]);
 
   const minWordLength = 3, maxWordLength = 7;
 
@@ -29,17 +29,20 @@ export const GameArea = () => {
     if (typedWord.length < minWordLength || typedWord.length > maxWordLength) {
       return;
     }
+    if (wordHistory.includes(typedWord)) {
+      return;
+    }
     // TODO: connect to word scoring service
     const wordValidation = await getWordData(typedWord);
     if (!wordValidation) return;
 
-    setWordHistory(prev => [...prev, typedWord.split('')]);
+    setWordHistory(prev => [...prev, typedWord]);
     setTypedWord('');
   }
 
   return (
-    <div className="flex h-full flex-col pb-2">
-      <WordHistory wordStrings={wordHistory} />
+    <div className="mt-auto flex flex-col pb-2">
+      <WordHistory words={wordHistory} />
       <div className="mt-16">
         <WordInput
           typedWord={typedWord}

@@ -16,7 +16,7 @@ export default function PlayPage() {
           </p>
         </div>
         {/* Page Content */}
-        <section className="h-full">
+        <section className="flex h-full flex-col">
           <GameArea />
         </section>
       </main>
