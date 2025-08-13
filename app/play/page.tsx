@@ -3,6 +3,7 @@ import Navbar from "@/src/components/Navbar";
 import { GameArea } from "@/src/components/GameArea";
 import ScoreArea from "@/src/components/ScoreArea";
 import { getStatus } from "@/lib/gsActions";
+import Modal from "@/src/components/Modal";
 // import Link from "next/link";
 
 export default async function PlayPage() {
@@ -13,6 +14,7 @@ export default async function PlayPage() {
     <>
       <ScoreArea />
       <GameArea />
+      <Modal />
     </>
   );
 }
