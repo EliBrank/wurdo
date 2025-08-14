@@ -11,4 +11,7 @@ fastapi[all]
 
 # Storage (REQUIRED for shared probability trees)
 redis>=4.5.0
-upstash_redis>=1.0.0 
+upstash_redis>=1.0.0
+
+# Word Processing (REQUIRED for rhymes and gameplay)
+pronouncing>=0.2.0 

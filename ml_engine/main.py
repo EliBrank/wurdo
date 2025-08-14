@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from services.game_service import get_game_service, GameService
 from contextlib import asynccontextmanager
+import os
 
 # This global variable will hold our single, initialized game service instance.
 game_service: GameService = None
@@ -35,7 +36,14 @@ app = FastAPI(lifespan=lifespan)
 
 # --- CORS Middleware ---
 
-origins = ["http://localhost:3000"]
+# Get frontend URL from environment, fallback to localhost for development
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+origins = [
+    frontend_url,
+    "http://localhost:3000",  # Keep localhost for development
+    "http://127.0.0.1:3000"  # Alternative localhost format
+]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
