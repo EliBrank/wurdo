@@ -64,7 +64,7 @@ async def get_game_status_endpoint():
 async def start_new_game_endpoint(data: StartGameInput):
     try:
         # We now use the correct variable: game_service
-        await game_service.reset_game()
+        # await game_service.reset_game()  # COMMENTED OUT: This was destroying ML resources unnecessarily
         return await game_service.start_game(data.start_word)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -77,12 +77,11 @@ async def play_player_move_endpoint(data: PlayerMoveInput):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.get("/end")
+@app.post("/end")
 async def end_current_game_endpoint():
     try:
         # We now use the correct variable: game_service
-        await game_service.end_game()
-        return await game_service.reset_game()
+        return await game_service.end_game()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
@@ -97,3 +96,8 @@ async def reset_game_endpoint():
         return await game_service.reset_game()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+# --- Server Startup ---
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

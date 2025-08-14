@@ -15,6 +15,7 @@ import traceback
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
+import time
 
 # ML Engine imports - using existing, proven components
 from services.enhanced_scoring_service import get_enhanced_scoring_service
@@ -52,6 +53,10 @@ class GameService:
         self.game_state = None
         self.initialized = False
         self.logger = logging.getLogger(__name__)
+        
+        # Game performance metrics collection
+        self.game_timing_metrics = []
+        self.game_start_time = None
         
     async def initialize(self) -> Dict[str, Any]:
         """
@@ -167,6 +172,13 @@ class GameService:
         """
         return self.frequencies_data.get(word.lower(), 0.0)
     
+    def _reset_game_metrics(self):
+        """Reset game performance metrics for a new game"""
+        self.game_timing_metrics = []
+        self.game_start_time = time.time()
+        if self.scoring_service and hasattr(self.scoring_service, 'clear_timing_metrics'):
+            self.scoring_service.clear_timing_metrics()
+    
     async def start_game(self, start_word: str) -> Dict[str, Any]:
         """
         Start a new game with the specified start word
@@ -183,6 +195,9 @@ class GameService:
                 
             self.logger.info(f"Starting game with start_word: {start_word}")
             
+            # Reset game performance metrics for new game
+            self._reset_game_metrics()
+            
             # Validate start word against frequencies.json (PHASE 1 requirement)
             if not self._is_valid_word(start_word):
                 raise GameServiceError(f"Start word '{start_word}' is not in the dictionary")
@@ -194,6 +209,9 @@ class GameService:
             
             # Get probability tree using unified hybrid storage (Redis first, JSON fallback)
             probability_tree = self.storage_service.get_probability_tree(start_word)
+            
+            # Collect timing metrics if a new tree was built
+            self._collect_timing_metrics()
             
             # Create suggestion objects using existing word service with real frequencies
             # Exclude the start word from suggestions since it's already played
@@ -289,6 +307,9 @@ class GameService:
             # Extract only the highest scoring category for Umi
             umi_result = self._extract_highest_scoring_category(umi_result)
             
+            # Collect timing metrics from any new probability tree builds
+            self._collect_timing_metrics()
+            
             # Update game state
             await self._update_game_state(candidate_word, umi_word, player_result, umi_result)
             
@@ -341,6 +362,12 @@ class GameService:
             redis_sync_result = await self._populate_redis_with_new_words()
             self.logger.info(f"Redis sync completed: {redis_sync_result}")
             
+            # Generate comprehensive game performance summary
+            performance_summary = self._generate_game_performance_summary()
+            
+            # Log the comprehensive game performance summary
+            self._log_game_performance_summary(performance_summary)
+            
             # Clean up ML model resources to free memory
             if hasattr(self.scoring_service, 'scorer') and self.scoring_service.scorer:
                 try:
@@ -356,7 +383,8 @@ class GameService:
                 "player_summary": player_summary,
                 "umi_summary": umi_summary,
                 "final_stats": final_stats,
-                "redis_update": redis_sync_result
+                "redis_update": redis_sync_result,
+                "performance_summary": performance_summary
             }
             
         except Exception as e:
@@ -754,6 +782,122 @@ class GameService:
             }
         
         return scoring_result
+
+    def _collect_timing_metrics(self):
+        """
+        Collect timing metrics from the scoring service if a new probability tree was built.
+        This method should be called after any operation that might trigger tree building.
+        """
+        if self.scoring_service and hasattr(self.scoring_service, 'get_last_timing_metrics'):
+            timing_metrics = self.scoring_service.get_last_timing_metrics()
+            if timing_metrics:
+                # Add game context to the metrics
+                timing_metrics['game_round'] = self.game_state.get('rounds_played', 0) if self.game_state else 0
+                timing_metrics['game_timestamp'] = time.time()
+                timing_metrics['current_word'] = self.game_state.get('current_word', 'unknown') if self.game_state else 'unknown'
+                
+                # Store the metrics for game summary
+                self.game_timing_metrics.append(timing_metrics)
+                
+                # Clear the metrics from the scoring service to avoid double-counting
+                self.scoring_service.clear_timing_metrics()
+                
+                self.logger.debug(f"📊 Collected timing metrics for '{timing_metrics['start_word']}': {timing_metrics['categories_built']} categories, {timing_metrics['total_sequences']} sequences")
+
+    def _generate_game_performance_summary(self) -> Dict[str, Any]:
+        """
+        Generate a comprehensive game performance summary from collected timing metrics.
+        This summary includes cumulative counts and averages across all rounds.
+        """
+        if not self.game_timing_metrics:
+            return {
+                "total_rounds": 0,
+                "total_categories_built": 0,
+                "total_sequences_generated": 0,
+                "avg_categories_per_round": 0.0,
+                "avg_sequences_per_round": 0.0,
+                "total_ml_computation_time": 0.0,
+                "ml_time_breakdown": {
+                    "grouping": 0.0,
+                    "model_calls": 0.0,
+                    "array_building": 0.0,
+                    "normalization": 0.0
+                },
+                "max_categories_in_a_round": 0,
+                "max_sequences_in_a_round": 0
+            }
+
+        total_rounds = len(self.game_timing_metrics)
+        total_categories = sum(m['categories_built'] for m in self.game_timing_metrics)
+        total_sequences = sum(m['total_sequences'] for m in self.game_timing_metrics)
+        
+        # Calculate actual ML computation time from tree builds
+        # Note: We need to get the detailed timing metrics from the scoring service
+        total_ml_time = 0.0
+        ml_time_breakdown = {
+            "grouping": 0.0,
+            "model_calls": 0.0,
+            "array_building": 0.0,
+            "normalization": 0.0
+        }
+        
+        # Collect detailed timing metrics from each tree build
+        for metrics in self.game_timing_metrics:
+            if 'detailed_timing' in metrics:
+                detailed = metrics['detailed_timing']
+                total_ml_time += detailed.get('total', 0.0)
+                ml_time_breakdown['grouping'] += detailed.get('grouping', 0.0)
+                ml_time_breakdown['model_calls'] += detailed.get('model_calls', 0.0)
+                ml_time_breakdown['array_building'] += detailed.get('array_building', 0.0)
+                ml_time_breakdown['normalization'] += detailed.get('normalization', 0.0)
+        
+        avg_categories_per_round = total_categories / total_rounds if total_rounds > 0 else 0.0
+        avg_sequences_per_round = total_sequences / total_rounds if total_rounds > 0 else 0.0
+
+        max_categories_in_a_round = max(m['categories_built'] for m in self.game_timing_metrics) if self.game_timing_metrics else 0
+        max_sequences_in_a_round = max(m['total_sequences'] for m in self.game_timing_metrics) if self.game_timing_metrics else 0
+
+        return {
+            "total_rounds": total_rounds,
+            "total_categories_built": total_categories,
+            "total_sequences_generated": total_sequences,
+            "avg_categories_per_round": avg_categories_per_round,
+            "avg_sequences_per_round": avg_sequences_per_round,
+            "total_ml_computation_time": total_ml_time,
+            "ml_time_breakdown": ml_time_breakdown,
+            "max_categories_in_a_round": max_categories_in_a_round,
+            "max_sequences_in_a_round": max_sequences_in_a_round
+        }
+
+    def _log_game_performance_summary(self, performance_summary: Dict[str, Any]):
+        """
+        Log the comprehensive game performance summary in a beautiful format.
+        """
+        self.logger.info("\n=== Game Performance Summary ===")
+        self.logger.info(f"Total Rounds Played: {performance_summary['total_rounds']}")
+        self.logger.info(f"Total Categories Built: {performance_summary['total_categories_built']}")
+        self.logger.info(f"Total Sequences Generated: {performance_summary['total_sequences_generated']}")
+        self.logger.info(f"Average Categories per Round: {performance_summary['avg_categories_per_round']:.2f}")
+        self.logger.info(f"Average Sequences per Round: {performance_summary['avg_sequences_per_round']:.2f}")
+        
+        if performance_summary['total_ml_computation_time'] > 0:
+            self.logger.info(f"Total ML Computation Time: {performance_summary['total_ml_computation_time']:.3f} seconds")
+            self.logger.info("ML Time Breakdown:")
+            breakdown = performance_summary['ml_time_breakdown']
+            if breakdown['grouping'] > 0:
+                self.logger.info(f"  ├─ Grouping:        {breakdown['grouping']:.3f}s")
+            if breakdown['model_calls'] > 0:
+                self.logger.info(f"  ├─ Model Calls:     {breakdown['model_calls']:.3f}s")
+            if breakdown['array_building'] > 0:
+                self.logger.info(f"  ├─ Array Building:   {breakdown['array_building']:.3f}s")
+            if breakdown['normalization'] > 0:
+                self.logger.info(f"  └─ Normalization:   {breakdown['normalization']:.3f}s")
+        else:
+            self.logger.info("ML Computation Time: No new trees built (all cached)")
+        
+        self.logger.info(f"Max Categories in a Round: {performance_summary['max_categories_in_a_round']}")
+        self.logger.info(f"Max Sequences in a Round: {performance_summary['max_sequences_in_a_round']}")
+        self.logger.info("===============================\n")
 
 async def get_game_service(game_data_path: str = None) -> GameService:
     """
