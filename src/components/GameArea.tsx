@@ -9,10 +9,12 @@ import { useGameContext } from "@/context";
 
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>("");
-  const [wordHistory, setWordHistory] = useState<string[]>([]);
-  const { setWordScore, setTotalScore } = useGameContext();
-  const { turns, setTurns } = useGameContext();
-  const { gameOver, setGameOver } = useGameContext();
+  const {
+    setWordScore, setTotalScore,
+    turns, setTurns,
+    gameOver, setGameOver,
+    wordHistory, setWordHistory,
+  } = useGameContext();
 
   if (!setWordScore) return;
   if (!setTotalScore) return;
