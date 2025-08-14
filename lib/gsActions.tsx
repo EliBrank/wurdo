@@ -1,7 +1,11 @@
 // api/gameApi.js
+
+// Get ML engine URL from environment, fallback to localhost for development
+const ML_ENGINE_URL = process.env.NEXT_PUBLIC_ML_ENGINE_URL || 'http://localhost:8000';
+
 export async function getStatus() {
   try {
-    const response = await fetch("http://localhost:8000/status");
+    const response = await fetch(`${ML_ENGINE_URL}/status`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -16,7 +20,7 @@ export async function getStatus() {
 
 export async function startGame(startWord: string) {
   try {
-    const response = await fetch("http://localhost:8000/start", {
+    const response = await fetch(`${ML_ENGINE_URL}/start`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -36,9 +40,10 @@ export async function startGame(startWord: string) {
     throw error;
   }
 }
+
 export async function playGame(candidateWord: string) {
   try {
-    const response = await fetch("http://localhost:8000/play", {
+    const response = await fetch(`${ML_ENGINE_URL}/play`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -61,7 +66,12 @@ export async function playGame(candidateWord: string) {
 
 export async function endGame() {
   try {
-    const response = await fetch("http://localhost:8000/play");
+    const response = await fetch(`${ML_ENGINE_URL}/end`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
@@ -70,7 +80,7 @@ export async function endGame() {
     }
     return await response.json();
   } catch (error) {
-    console.error("Failed to start game:", error);
+    console.error("Failed to end game:", error);
     throw error;
   }
 }

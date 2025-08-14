@@ -4,12 +4,8 @@ import { GameArea } from "@/src/components/GameArea";
 import ScoreArea from "@/src/components/ScoreArea";
 import { getStatus } from "@/lib/gsActions";
 import Modal from "@/src/components/Modal";
-// import Link from "next/link";
 
 export default async function PlayPage() {
-  let status = await getStatus();
-  console.log(status);
-
   return (
     <>
       <ScoreArea />

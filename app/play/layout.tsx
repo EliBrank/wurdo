@@ -1,7 +1,7 @@
 "use client";
 
 import { useGameContext } from "@/context";
-import { startGame, getStatus } from "@/lib/gsActions";
+import { startGame } from "@/lib/gsActions";
 import { useEffect, useState, useContext } from "react";
 export default function PlayLayout({
   children,
