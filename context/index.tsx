@@ -29,7 +29,7 @@ export function GameContextWrapper({
   const [wordHistory, setWordHistory] = useState([""]);
   const [wordScore, setWordScore] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
-  const [startWord, setStartWord] = useState("free");
+  const [startWord, setStartWord] = useState("hello");
   const [gameOver, setGameOver] = useState(false);
   const [turns, setTurns] = useState(10);
 

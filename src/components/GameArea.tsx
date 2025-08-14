@@ -16,6 +16,9 @@ export const GameArea = () => {
 
   if (!setWordScore) return;
   if (!setTotalScore) return;
+  if (!setTurns) return;
+  if (!turns) return 10;
+  if (!setGameOver) return;
 
   const minWordLength = 3,
     maxWordLength = 7;
