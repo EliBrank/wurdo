@@ -7,6 +7,7 @@ export default function ScoreMeter() {
     useGameContext();
   if (wordScore === undefined) return null;
   if (totalScore === undefined) return null;
+  if (!turns) return 10;
 
   const percentage = (turns / 10) * 100;
 

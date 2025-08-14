@@ -5,8 +5,16 @@ import { createContext, SetStateAction, useContext, useState } from "react";
 interface GameContext {
   currentScore?: number;
   setCurrentScore?: React.Dispatch<SetStateAction<number>>;
-  maxScore?: number;
-  setMaxScore?: React.Dispatch<SetStateAction<number>>;
+  wordHistory?: string[];
+  setWordHistory?: React.Dispatch<SetStateAction<string[]>>;
+  totalScore?: number;
+  setTotalScore?: React.Dispatch<SetStateAction<number>>;
+  gameOver?: boolean;
+  setGameOver?: React.Dispatch<SetStateAction<boolean>>;
+  turns?: number;
+  setTurns?: React.Dispatch<SetStateAction<number>>;
+  wordScore?: number;
+  setWordScore?: React.Dispatch<SetStateAction<number>>;
   startWord?: string;
   setStartWord?: React.Dispatch<SetStateAction<string>>;
 }
@@ -18,7 +26,7 @@ export function GameContextWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const [wordHistory, setWordHistory] = useState([]);
+  const [wordHistory, setWordHistory] = useState([""]);
   const [wordScore, setWordScore] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
   const [startWord, setStartWord] = useState("free");
