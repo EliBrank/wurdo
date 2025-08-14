@@ -78,7 +78,7 @@ export const GameArea = () => {
   return (
     <div className="mt-auto flex flex-col pb-2">
       <WordHistory words={wordHistory} />
-      <div className="mt-16">
+      <div className="mt-50">
         <WordInput typedWord={typedWord} onSubmit={handleSubmit} />
         <Keyboard onKeyPress={handleKeyPress} onBackspace={handleBackspace} />
       </div>
