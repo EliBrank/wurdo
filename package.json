@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@swc/helpers": "^0.5.3",
-    "@upstash/redis": "^1.35.1",
+
     "motion": "^12.23.12",
     "next": "15.4.4",
     "react": "19.1.0",

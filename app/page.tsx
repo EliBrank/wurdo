@@ -15,7 +15,7 @@ export default function HomePage() {
             Desktop coming soon!
           </p>
         </div>
-        <section className="flex min-h-screen flex-col items-center py-20 md:hidden">
+        <section className="flex min-h-100% flex-col items-center py-20 ">
           <GameModeButton label="Daily" href="/play" />
           <GameModeButton label="Infinite" href="/play" />
           <GameModeButton label="Challenge" href="/play" />

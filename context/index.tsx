@@ -1,46 +1,35 @@
 "use client";
 
-import {
-  createContext,
-  SetStateAction,
-  use,
-  useContext,
-  useState,
-} from "react";
+import { createContext, SetStateAction, useContext, useState } from "react";
 
 interface GameContext {
-  wordHistory: string[];
-  setWordHistory: React.Dispatch<SetStateAction<string[]>>;
-  wordScore?: number;
-  setWordScore?: React.Dispatch<SetStateAction<number>>;
+  currentScore?: number;
+  setCurrentScore?: React.Dispatch<SetStateAction<number>>;
+  wordHistory?: string[];
+  setWordHistory?: React.Dispatch<SetStateAction<string[]>>;
   totalScore?: number;
   setTotalScore?: React.Dispatch<SetStateAction<number>>;
+  gameOver?: boolean;
+  setGameOver?: React.Dispatch<SetStateAction<boolean>>;
+  turns?: number;
+  setTurns?: React.Dispatch<SetStateAction<number>>;
+  wordScore?: number;
+  setWordScore?: React.Dispatch<SetStateAction<number>>;
   startWord?: string;
   setStartWord?: React.Dispatch<SetStateAction<string>>;
-  gameOver: boolean;
-  setGameOver: React.Dispatch<SetStateAction<boolean>>;
-  turns: number;
-  setTurns: React.Dispatch<SetStateAction<number>>;
 }
 
-export const GameContext = createContext<GameContext>({
-  wordHistory: [],
-  setWordHistory: () => {},
-  turns: 0,
-  setTurns: () => {},
-  gameOver: false,
-  setGameOver: () => {},
-});
+export const GameContext = createContext<GameContext>({});
 
 export function GameContextWrapper({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [wordHistory, setWordHistory] = useState<string[]>([]);
-  const [totalScore, setTotalScore] = useState(0);
   const [wordScore, setWordScore] = useState(0);
-  const [startWord, setStartWord] = useState("free");
+  const [totalScore, setTotalScore] = useState(0);
+  const [startWord, setStartWord] = useState("hello");
+  const [wordHistory, setWordHistory] = useState([startWord]);
   const [gameOver, setGameOver] = useState(false);
   const [turns, setTurns] = useState(10);
 
