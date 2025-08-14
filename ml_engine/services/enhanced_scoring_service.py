@@ -14,6 +14,7 @@ from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
 from pathlib import Path
 import sys
+import time # Added for timing metrics
 
 # Add ml_engine root to path for absolute imports
 sys.path.append(str(Path(__file__).parent.parent))
@@ -171,7 +172,26 @@ class EnhancedScoringService:
             }
             
             # Build probability tree
-            tree = self.tree_builder.get_or_build_tree(start_word, valid_words)
+            tree, timing_metrics = self.tree_builder.get_or_build_tree(start_word, valid_words)
+            
+            # Store timing metrics if available (for GameService to collect)
+            if timing_metrics:
+                # Add additional context for GameService
+                timing_metrics['scoring_service_timestamp'] = time.time()
+                timing_metrics['word_transformations'] = {
+                    'anagrams': len(transformations.anagrams),
+                    'perfect_rhymes': len(transformations.perfect_rhymes),
+                    'rich_rhymes': len(transformations.rich_rhymes),
+                    'slant_rhymes': len(transformations.slant_rhymes),
+                    'added_letters': len(transformations.added_letters),
+                    'removed_letters': len(transformations.removed_letters),
+                    'changed_letters': len(transformations.changed_letters)
+                }
+                # Store timing metrics in a way that GameService can access
+                if hasattr(self, 'last_timing_metrics'):
+                    self.last_timing_metrics = timing_metrics
+                else:
+                    self.last_timing_metrics = timing_metrics
             
             # Validate tree
             if validate_probability_tree(tree):
@@ -873,6 +893,20 @@ class EnhancedScoringService:
         except Exception as e:
             logger.error(f"❌ Error calculating score with probability tree: {e}")
             return self._calculate_transformation_score_fallback(start_word, candidate_word, transformation_category, cached_transformations)
+
+    def get_last_timing_metrics(self) -> Optional[Dict[str, Any]]:
+        """
+        Get the timing metrics from the last probability tree build.
+        
+        Returns:
+            Timing metrics dictionary or None if no tree has been built yet
+        """
+        return getattr(self, 'last_timing_metrics', None)
+    
+    def clear_timing_metrics(self):
+        """Clear stored timing metrics (called when starting new games)"""
+        if hasattr(self, 'last_timing_metrics'):
+            delattr(self, 'last_timing_metrics')
 
 def get_enhanced_scoring_service(model_name: str = "distilgpt2", device: str = "cpu", storage_type: str = "json", json_file_path: str = None, storage_service=None) -> EnhancedScoringService:
     """

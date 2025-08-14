@@ -1,7 +1,7 @@
 "use client";
 
 import { useGameContext } from "@/context";
-import { startGame, getStatus } from "@/lib/gsActions";
+import { startGame } from "@/lib/gsActions";
 import { useEffect, useState, useContext } from "react";
 export default function PlayLayout({
   children,
@@ -13,10 +13,9 @@ export default function PlayLayout({
   useEffect(() => {
     startGame(startWord);
   }, []);
-
   return (
     <div className="flex h-full flex-col">
-      <main className="xs:p-4 flex flex-1 flex-col bg-primary-light p-2">
+      <main className="xs:p-4 flex flex-1 flex-col bg-primary-light p-2 md:px-50">
         {/* Desktop-only message */}
         <div className="hidden space-x-6 font-medium md:flex">
           <p>

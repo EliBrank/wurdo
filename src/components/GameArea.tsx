@@ -9,12 +9,17 @@ import { useGameContext } from "@/context";
 
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>("");
-  const [wordHistory, setWordHistory] = useState<string[]>([]);
-  const { wordScore } = useGameContext();
   const { setWordScore, setTotalScore } = useGameContext();
+  const { turns, setTurns } = useGameContext();
+  const { gameOver, setGameOver } = useGameContext();
+  const { wordHistory, setWordHistory } = useGameContext();
 
   if (!setWordScore) return;
   if (!setTotalScore) return;
+  if (!setTurns) return;
+  if (!turns) return 10;
+  if (!setGameOver) return;
+  if (!wordHistory) return;
 
   const minWordLength = 3,
     maxWordLength = 7;
@@ -33,6 +38,10 @@ export const GameArea = () => {
   };
 
   const handleSubmit = async () => {
+    if (turns <= 0 || gameOver) {
+      return;
+    }
+
     if (typedWord.length < minWordLength || typedWord.length > maxWordLength)
       return;
     if (wordHistory.includes(typedWord)) return;
@@ -54,17 +63,23 @@ export const GameArea = () => {
     const wordScoreValue = Math.round(
       wordValidation.player_result.data.total_score
     );
-
+    setWordScore(wordScoreValue);
     setTotalScore((prev) => prev + wordScoreValue);
 
-    setWordHistory((prev) => [...prev, typedWord]);
+    setWordHistory?.((prev) => [...prev, typedWord]);
     setTypedWord("");
+
+    const roundTurns = turns - 1;
+    setTurns(roundTurns);
+    if (roundTurns === 0) {
+      setGameOver(true);
+    }
   };
 
   return (
     <div className="mt-auto flex flex-col pb-2">
       <WordHistory words={wordHistory} />
-      <div className="mt-16">
+      <div className="mt-50">
         <WordInput typedWord={typedWord} onSubmit={handleSubmit} />
         <Keyboard onKeyPress={handleKeyPress} onBackspace={handleBackspace} />
       </div>

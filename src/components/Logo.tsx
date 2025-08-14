@@ -1,11 +1,11 @@
 import Image from "next/image";
-import BeigeBG from "../assets/images/BeigeBG.png";
+import WurdoLogo from "../assets/images/logo.png";
 import React from "react";
 
 export default function Logo() {
   return (
     <div>
-      <Image src={BeigeBG} alt="wurdo" className="h-8 w-19 p-0"></Image>
+      <Image src={WurdoLogo} alt="wurdo" className="h-8 w-19 p-0"></Image>
     </div>
   );
 }

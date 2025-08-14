@@ -413,13 +413,18 @@ def get_onnx_scorer(model_name: str = "distilgpt2", device: str = "cpu") -> Dist
     
     if _global_onnx_scorer is None:
         _global_onnx_scorer = DistilGPT2ONNX()
-        _global_onnx_scorer.initialize()
+        # Resolve model path relative to ml_engine directory
+        model_path = Path(__file__).parent.parent / "distilgpt2_onnx" / "model.onnx"
+        _global_onnx_scorer.initialize(str(model_path))
     
     return _global_onnx_scorer
 
-def initialize_onnx_scorer(model_path: str = "distilgpt2_onnx/model.onnx") -> bool:
+def initialize_onnx_scorer(model_path: str = None) -> bool:
     """Initialize the global ONNX scorer"""
     scorer = get_onnx_scorer()
+    if model_path is None:
+        # Resolve model path relative to ml_engine directory
+        model_path = str(Path(__file__).parent.parent / "distilgpt2_onnx" / "model.onnx")
     return scorer.initialize(model_path)
 
 def cleanup_onnx_scorer():

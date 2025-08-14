@@ -7,21 +7,19 @@ type WordHistoryProps = {
 
 export const WordHistory = ({ words }: WordHistoryProps) => {
   const wordStrings = words.map((word) => {
-    return word.split('');
+    return word.split("");
   });
 
   return (
-    <div className="relative">
-      <div
-        className="flex max-h-[50vh] min-h-24 flex-col-reverse overflow-y-auto border px-16 py-2"
-      >
+    <div className="relative h-150">
+      <div className="flex max-h-[90vh] min-h-24 flex-col-reverse overflow-y-auto border px-16 py-2">
         <AnimatePresence initial={false}>
           {[...wordStrings].reverse().map((letters, index) => {
             const isNewest = index === 0;
 
             return (
               <motion.div
-                key={letters.join('')}
+                key={letters.join("")}
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: isNewest ? 1 : 0.4 }}
                 exit={{ opacity: 0 }}
@@ -29,10 +27,11 @@ export const WordHistory = ({ words }: WordHistoryProps) => {
                 className="my-2 grid w-full grid-cols-7 gap-1"
               >
                 {letters.map((letter, i) => (
-                  <div key={i} className="flex flex-1 items-center justify-center">
-                    <WordHistoryTile
-                      label={letter}
-                    />
+                  <div
+                    key={i}
+                    className="flex flex-1 items-center justify-center"
+                  >
+                    <WordHistoryTile label={letter} />
                   </div>
                 ))}
               </motion.div>
