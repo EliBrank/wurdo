@@ -9,16 +9,17 @@ import { useGameContext } from "@/context";
 
 export const GameArea = () => {
   const [typedWord, setTypedWord] = useState<string>("");
-  const [wordHistory, setWordHistory] = useState<string[]>([]);
   const { setWordScore, setTotalScore } = useGameContext();
   const { turns, setTurns } = useGameContext();
   const { gameOver, setGameOver } = useGameContext();
+  const { wordHistory, setWordHistory } = useGameContext();
 
   if (!setWordScore) return;
   if (!setTotalScore) return;
   if (!setTurns) return;
   if (!turns) return 10;
   if (!setGameOver) return;
+  if (!wordHistory) return;
 
   const minWordLength = 3,
     maxWordLength = 7;
@@ -65,7 +66,7 @@ export const GameArea = () => {
     setWordScore(wordScoreValue);
     setTotalScore((prev) => prev + wordScoreValue);
 
-    setWordHistory((prev) => [...prev, typedWord]);
+    setWordHistory?.((prev) => [...prev, typedWord]);
     setTypedWord("");
 
     const roundTurns = turns - 1;
